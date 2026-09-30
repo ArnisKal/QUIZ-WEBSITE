@@ -1,0 +1,90 @@
+<?php session_start();?>
+<?php require_once 'auth.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzity</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header class="header">
+
+    <h1>QUIZZITY</h1>
+
+    <input type="search" class="search" placeholder="Search quizzes...">
+
+    <nav class="nav">
+        <a href="quizes.php">Quizzes</a>
+        <a href="leaderboards.php">Leaderboards</a>
+
+        <?php if (isset($_SESSION['user_id'])): ?>
+
+            <span>
+                Welcome, <?= htmlspecialchars($_SESSION['username']) ?>
+            </span>
+
+            <a href="logout.php">Logout</a>
+
+        <?php else: ?>
+
+            <a href="login.php">Login</a>
+            <a href="register.php">Register</a>
+
+        <?php endif; ?>
+
+    </nav>
+
+</header>
+
+    <div class="ad_main">
+        <div class="ad">
+            <h1>Welcome to QUIZZITY!</h1>
+            <p>The place where you can be yourself!</p>
+            <img src="images/my-summer-car.gif">
+        </div>
+    </div>
+
+    <section class="info-blocks">
+
+        <article class="info-block">
+            <img src="images/craft.jpg" alt="Create Quizzes">
+            <h2>Create Quizzes</h2>
+            <p>Build your own quizzes in minutes and share them with the world.</p>
+        </article>
+
+        <article class="info-block">
+            <img src="images/" alt="Play &amp; Learn">
+            <h2>Play &amp; Learn</h2>
+            <p>Try quizzes made by the community on any topic.</p>
+        </article>
+
+        <article class="info-block">
+            <img src="images/leader.jpeg" alt="Climb the Leaderboard">
+            <h2>Climb the Leaderboard</h2>
+            <p>Score points, beat other players and become number one.</p>
+        </article>
+
+        <article class="info-block">
+            <img src="images/" alt="Join the Community">
+            <h2>Join the QUIZZITY</h2>
+            <p>Join our team, to be yourself!</p>
+        </article>
+
+    </section>
+
+   <footer class="footer">
+    <nav class="footer_links">
+        <a href="#" aria-label="Github"><img src="images/github.png" width="40" height="40" alt="Github"></a>
+        <a href="#" aria-label="Twitter"><img src="images/twitter.png" width="40" height="40" alt="Twitter"></a>
+        <a href="#" aria-label="Youtube"><img src="images/youtube.png" width="40" height="40" alt="Youtube"></a>
+        <a href="#" aria-label="Twitch"><img src="images/twitch.png" width="40" height="40" alt="Twitch"></a>
+    </nav>
+    <p class="footer_copy">© 2026 QUIZZITY. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
