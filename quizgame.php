@@ -6,6 +6,6 @@
     <title>Game</title>
 </head>
 <body>
-    <div></div>
+    
 </body>
 </html>

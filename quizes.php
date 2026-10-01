@@ -37,38 +37,80 @@
 
 <div class="section_container">
 
-   <article class="section" data-type="official">
-        <div class="section_content">
-            <h2>Memes</h2>
+    <article class="section" data-type="official">
+    <div class="section_content">
+        <h2>Memes</h2>
+        <p>The memes that know everyone!</p>
 
-            <p>The memes that know everyone!</p>
-
-            <div class="section_actions">
-                <button class="section_play_btn">QUIZZY!</button>
-            </div>
-
+        <div class="section_actions">
+            <a href="quiz.php?id=1" class="section_play_btn">
+                QUIZZY!
+            </a>
         </div>
-        <img class="section_img" src="images/arriba.png" alt="Meme">
+    </div>
+
+    <img class="section_img" src="images/arriba.png" alt="Memes">
     </article>
 
     <article class="section" data-type="created">
-        <h2>Games</h2>
+        <div class="section_content">
+            <h2>Movies</h2>
+            <p>Became the most popular movie star!</p>
 
-        <div class="section_actions">
-            <button class="section_play_btn">QUIZZY!</button>
-        </div> 
-
+            <div class="section_actions">
+                <a href="quiz.php?id=2" class="section_play_btn">
+                    QUIZZY!
+                </a>
+            </div>
+        </div>
     </article>
 
     <article class="section" data-type="official">
-        <h2>IT</h2>
+        <div class="section_content">
+            <h2>IT</h2>
+            <p>Became the genius in IT technologies!</p>
 
-        <div class="section_actions">
-            <button class="section_play_btn">QUIZZY!</button>
+            <div class="section_actions">
+                <a href="quiz.php?id=3" class="section_play_btn">
+                    QUIZZY!
+                </a>
+            </div>
         </div>
-        
     </article>
+
+    <article class="section" data-type="official">
+        <div class="section_content">
+            <h2>Games</h2>
+
+            <div class="section_actions">
+                <a href="quiz.php?id=4" class="section_play_btn">
+                    QUIZZY!
+                </a>
+            </div>
+        </div>
+
+        <img class="section_img" src="images/rdr.png" alt="Games">
+    </article>
+
+    <article class="section" data-type="official">
+        <div class="section_content">
+            <h2>Entertainment</h2>
+
+            <div class="section_actions">
+                <a href="quiz.php?id=5" class="section_play_btn">
+                    QUIZZY!
+                </a>
+            </div>
+        </div>
+
+        <img class="section_img" src="images/earth.jpg" alt="Earth">
+    </article>
+
+     
+
 </div>
+
+    
 
 </body>
 </html>
