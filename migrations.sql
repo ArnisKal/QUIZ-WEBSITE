@@ -131,9 +131,46 @@ VALUES
 (5, 14, 'Which streaming service produced the series Stranger Things?'),
 (5, 15, 'Which artist is known for the song "Shape of You"?');
 
-DELETE FROM questions WHERE quiz_id = 1;
-DELETE FROM questions WHERE quiz_id = 2;
+CREATE TEMPORARY TABLE answer_data ( 
+	quiz_id INT,
+	question_number INT, 
+	correct INT, 
+	a1 VARCHAR(255), 
+	a2 VARCHAR(255), 
+	a3 VARCHAR(255), 
+	a4 VARCHAR(255) 
+);
 
-UPDATE users
-SET role = 'admin'
-WHERE id = 1;
+INSERT INTO answer_data 
+VALUES
+(1,1,1,'2010','2005','2015','2020'), 
+(1,2,1,'Drake','Ryan Reynolds','Tom Holland','Keanu Reeves'), 
+(1,3,1,'It is used to express an idea or reaction humorously','It is a type of computer virus','It is a movie title','It is a programming language'), 
+(1,4,1,'A humorous or relatable response','A mathematical equation','A movie review','A computer command'), 
+(1,5,1,'Drake Hotline Bling','Distracted Boyfriend','Doge','Success Kid'), 
+(1,6,1,'Distracted Boyfriend','Pepe the Frog','Doge','Rickroll'), 
+(1,7,1,'Pepe the Frog','Mario','Sonic','Shrek'), 
+(1,8,1,'The Office','Friends','Breaking Bad','Stranger Things'), 
+(1,9,1,'A funny or unexpected situation','A scientific experiment','A political speech','A sports match'), 
+(1,10,1,'This is fine','May the Force be with you','I am Groot','Why so serious?'), 
+(1,11,1,'The person shown in the original photograph','The meme creator','A fictional character','A cartoon character'), 
+(1,12,1,'A memorable or humorous event','A software update','A video game release','A weather event'), 
+(1,13,1,'Humor or a reaction','A password','A recipe','A computer command'), 
+(1,14,1,'2010s','1980s','1990s','2020s'), 
+(1,15,1,'A popular internet meme','A programming language','A movie genre','A music album'),
+
+(2,1,1,'Jared Hess','Christopher Nolan','James Cameron','Steven Spielberg'), 
+(2,2,1,'Titanic','Inception','The Great Gatsby','Avatar'), 
+(2,3,1,'Robert Downey Jr.','Chris Evans','Chris Hemsworth','Mark Ruffalo'), 
+(2,4,1,'2002','2000','2004','2005'), 
+(2,5,1,'Thanos','Loki','Ultron','Kang'), 
+(2,6,1,'Ben-Hur, Titanic, and The Lord of the Rings: The Return of the King','Avatar','The Godfather','Gladiator'), 
+(2,7,1,'Pixar','DreamWorks','Warner Bros.','Universal'), 
+(2,8,1,'Johnny Depp','Orlando Bloom','Brad Pitt','Tom Cruise'), 
+(2,9,1,'Arendelle','Agrabah','Wakanda','Asgard'), 
+(2,10,1,'The Terminator','Predator','RoboCop','Die Hard'), 
+(2,11,1,'Steven Spielberg','James Cameron','George Lucas','Christopher Nolan'), 
+(2,12,1,'Titanic','Good Will Hunting','Saving Private Ryan','The Truman Show'), 
+(2,13,1,'Na''vi','Kryptonians','Wookies','Vulcans'), 
+(2,14,1,'Jenna Ortega','Emma Stone','Millie Bobby Brown','Anya Taylor-Joy'), 
+(2,15,1,'Harry Potter','Percy Jackson','The Lord of the Rings','The Chronicles of Narnia');
