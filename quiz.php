@@ -15,9 +15,7 @@ $stmt = $pdo->prepare(
      ORDER BY question_number'
 );
 
-var_dump($current);
-var_dump($question);
-exit;
+
 
 $stmt->execute([$quiz_id]);
 
@@ -33,7 +31,7 @@ if ($current < 0 || $current >= count($questions)) {
 
 $question = $questions[$current];
 
-$stmt = $pdo->prepare(
+$stmt = $pdo->prepare(  
     'SELECT id, text, is_correct
      FROM answers
      WHERE question_id = ?
@@ -41,7 +39,7 @@ $stmt = $pdo->prepare(
 );
 
 $stmt->execute([$question['id']]);
-
+    
 $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (!$answers) {
