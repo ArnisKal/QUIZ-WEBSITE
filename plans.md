@@ -10,10 +10,12 @@
 9. Izveidot mobilo responsivitāti
 10. Izveidot tumšo motīvu mājaslapai
 11. Jātiek galā ar rewgister problēmām, kad tikšu galā izveidot login sistēmu.
+12. Izveidot quiz_create jebkuram lietotājam
+13. 
 
 ## Jau paveiktais 
 
 1. Sākts veidots register/login sistēmas
 2. Sāku veidot Main page, kā arī nedaudz diazainu tai
 3. Izveidoju login un register sistēmu.
-4. 
+4. Izveidots login un register

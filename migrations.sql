@@ -38,7 +38,7 @@ CREATE TABLE answers (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     question_id INT UNSIGNED NOT NULL,
     text VARCHAR(255) NOT NULL,
-    is_correct TINYINT(1) NOT NULL DEFAULT 0,
+      TINYINT(1) NOT NULL DEFAULT 0,
 
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
@@ -174,3 +174,6 @@ VALUES
 (2,13,1,'Na''vi','Kryptonians','Wookies','Vulcans'), 
 (2,14,1,'Jenna Ortega','Emma Stone','Millie Bobby Brown','Anya Taylor-Joy'), 
 (2,15,1,'Harry Potter','Percy Jackson','The Lord of the Rings','The Chronicles of Narnia');
+
+
+UPDATE questions SET quiz_id = 1 WHERE quiz_id = 3;
