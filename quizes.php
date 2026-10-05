@@ -48,6 +48,10 @@
 
     <?php endif; ?>
 
+    <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+        <a href="admin/admin.php">Admin</a>
+    <?php endif; ?>
+
 </nav>
 
 </header> <div class="filters" role="group" aria-label="Quiz filters">

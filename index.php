@@ -27,6 +27,10 @@
                 Welcome, <?= htmlspecialchars($_SESSION['username']) ?>
             </span>
 
+            <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+                <a href="admin/admin.php">Admin</a>
+            <?php endif; ?>
+
             <a href="logout.php">Logout</a>
 
         <?php else: ?>
@@ -35,6 +39,8 @@
             <a href="register.php">Register</a>
 
         <?php endif; ?>
+
+        
 
     </nav>
 
