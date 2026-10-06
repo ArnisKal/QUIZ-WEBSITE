@@ -23,7 +23,7 @@ $quizzes = $pdo->query("
 
 <header class="header">
 
-    <a href="quizes.php" class="logo">
+    <a href="index.php" class="logo">
         QUIZZITY
     </a>
 

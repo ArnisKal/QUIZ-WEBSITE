@@ -49,7 +49,7 @@ if($_SERVER['REQUEST_METHOD']=== 'POST'){
 <body>
 
 <h1>New Quiz</h1>
-<p><a href="admin.php">Back to admin panel</a></p>
+<p><a href="admin/admin.php">Back to admin panel</a></p>
 
 <?php if ($error): ?>
     <p style="color:red"><?= htmlspecialchars($error) ?></p>

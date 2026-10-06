@@ -398,7 +398,6 @@ main {
 }
 
 /* Cards */
-/* Cards */
 
 .section_container {
     width: 100%;
@@ -426,9 +425,7 @@ main {
 
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 
-    transition:
-        box-shadow 0.3s ease,
-        transform 0.3s ease;
+    transition:box-shadow 0.3s ease,transform 0.3s ease;
 
     overflow: hidden;
 }
@@ -459,11 +456,7 @@ main {
     margin: 0;
 
     font-size: 1.4rem;
-    font-family:
-        'Franklin Gothic Medium',
-        'Arial Narrow',
-        Arial,
-        sans-serif;
+    font-family:'Franklin Gothic Medium','Arial Narrow',Arial,sans-serif;
 }
 
 .section p {
@@ -485,15 +478,10 @@ main {
 .section_img {
     width: 130px;
     height: 130px;
-
     flex: 0 0 130px;
-
     align-self: center;
-
     object-fit: cover;
-
     margin-left: 1rem;
-
     border-radius: 50%;
 }
 
@@ -503,34 +491,17 @@ main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     padding: 0.7rem 1.5rem;
-
     font-size: 1rem;
     font-weight: 600;
-
     color: #fff;
     background-color: #ea580c;
-
     border: none;
     border-radius: 22px;
-
     cursor: pointer;
-
     text-decoration: none;
-
-    font-family:
-        'Trebuchet MS',
-        'Lucida Sans Unicode',
-        'Lucida Grande',
-        'Lucida Sans',
-        Arial,
-        sans-serif;
-
-    transition:
-        transform 0.2s ease,
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
+    font-family:'Trebuchet MS','Lucida Sans Unicode','Lucida Grande','Lucida Sans',Arial,sans-serif;
+    transition:transform 0.2s ease,background-color 0.2s ease,box-shadow 0.2s ease;
 }
 
 .section_play_btn:hover,
