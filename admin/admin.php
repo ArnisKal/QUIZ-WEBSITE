@@ -30,9 +30,9 @@ $quizzes = $pdo->query('SELECT q.id, q.title, q.type, COUNT(qs.id) AS questions_
       <td><?= htmlspecialchars($q['type']) ?></td>
       <td><?= $q['questions_count'] ?></td>
       <td>
-        <a href="quiz.php?id=<?= $q['id'] ?>">Play</a> |
-        <a href="quiz_edit.php?id=<?= $q['id'] ?>">Edit</a> |
-        <a href="quiz_delete.php?id=<?= $q['id'] ?>">Delete</a>
+        <a href="../quiz.php?id=<?= (int)$q['id'] ?>">Play</a> |
+        <a href="quiz_edit.php?id=<?= (int)$q['id'] ?>">Edit</a> |
+        <a href="quiz_delete.php?id=<?= (int)$q['id'] ?>">Delete</a>
       </td>
     </tr>
   <?php endforeach; ?>
