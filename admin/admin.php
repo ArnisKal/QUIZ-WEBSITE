@@ -1,13 +1,7 @@
 <?php
 require 'admin_check.php';
 
-$quizzes = $pdo->query("
-    SELECT q.id, q.title, q.type, COUNT(qs.id) AS questions_count
-    FROM quizzes q
-    LEFT JOIN questions qs ON qs.quiz_id = q.id
-    GROUP BY q.id
-    ORDER BY q.id DESC
-")->fetchAll();
+$quizzes = $pdo->query('SELECT q.id, q.title, q.type, COUNT(qs.id) AS questions_count FROM quizzes q LEFT JOIN questions qs ON qs.quiz_id = q.id GROUP BY q.id ORDER BY q.id DESC ')->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +12,7 @@ $quizzes = $pdo->query("
 </head>
 <body>
 <h1>Admin Panel</h1>
-<p><a href="index.php">Back to site</a> | <a href="quiz_create.php">Create quiz</a></p>
+<p><a href="../index.php">Back to main page</a> | <a href="../quiz_create.php">Create quiz</a></p>
 
 <table>
   <tr>

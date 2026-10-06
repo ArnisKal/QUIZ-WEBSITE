@@ -24,7 +24,7 @@
         <?php if (isset($_SESSION['user_id'])): ?>
 
             <span>
-                Welcome, <?= htmlspecialchars($_SESSION['username']) ?>
+                Hi, <?= htmlspecialchars($_SESSION['username']) ?>
             </span>
 
             <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
@@ -84,7 +84,7 @@
 
    <footer class="footer">
     <nav class="footer_links">
-        <a href="#" aria-label="Github"><img src="images/github.png" width="40" height="40" alt="Github"></a>
+        <a href="https://github.com/ArnisKal/QUIZ-WEBSITE" aria-label="Github"><img src="images/github.png" width="40" height="40" alt="Github"></a>
         <a href="#" aria-label="Twitter"><img src="images/twitter.png" width="40" height="40" alt="Twitter"></a>
         <a href="#" aria-label="Youtube"><img src="images/youtube.png" width="40" height="40" alt="Youtube"></a>
         <a href="#" aria-label="Twitch"><img src="images/twitch.png" width="40" height="40" alt="Twitch"></a>

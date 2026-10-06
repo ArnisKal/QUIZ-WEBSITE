@@ -1,240 +1,155 @@
-<?php session_start(); ?> <!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quizzes</title>
+<?php
+session_start();
+require_once 'database.php';
 
-<link rel="stylesheet" href="styles.css">
+// Only quizzes that already have at least one question are shown to players
+$quizzes = $pdo->query("
+    SELECT q.*
+    FROM quizzes q
+    WHERE EXISTS (SELECT 1 FROM questions qs WHERE qs.quiz_id = q.id)
+    ORDER BY q.id DESC
+")->fetchAll();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes</title>
 
-</head> <body> <header class="header">
-<a href="index.php" class="logo">
-    QUIZZITY
-</a>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-<form action="search.php" method="get" class="search_form">
+<header class="header">
 
-    <input
-        type="search"
-        name="q"
-        class="search"
-        placeholder="Search quizzes..."
-        aria-label="Search quizzes"
-    >
-
-</form>
-
-<nav class="nav">
-
-    <a href="leaderboards.php">
-        Leaderboards
+    <a href="quizes.php" class="logo">
+        QUIZZITY
     </a>
 
-    <?php if (isset($_SESSION['user_id'])): ?>
+    <form action="search.php" method="get" class="search_form">
+        <input
+            type="search"
+            name="q"
+            class="search"
+            placeholder="Search quizzes..."
+            aria-label="Search quizzes"
+        >
+    </form>
 
-        <span class="welcome">
-            Hi, <?= htmlspecialchars($_SESSION['username']) ?>
-        </span>
+    <nav class="nav">
 
-        <a href="logout.php">
-            Logout
+        <a href="leaderboards.php">
+            Leaderboards
         </a>
 
-    <?php else: ?>
+        <?php if (isset($_SESSION['user_id'])): ?>
 
-        <a href="login.php">
-            Login
-        </a>
+            <span class="welcome">
+                Hi, <?= htmlspecialchars($_SESSION['username']) ?>
+            </span>
 
-        <a href="register.php" class="nav_cta">
-            Sign up
-        </a>
+            <a href="logout.php">
+                Logout
+            </a>
 
+        <?php else: ?>
+
+            <a href="login.php">
+                Login
+            </a>
+
+            <a href="register.php" class="nav_cta">
+                Sign up
+            </a>
+
+        <?php endif; ?>
+
+        <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+            <a href="admin/admin.php">Admin</a>
+        <?php endif; ?>
+
+    </nav>
+
+</header>
+
+<div class="filters" role="group" aria-label="Quiz filters">
+    <button class="filter_btn active" data-filter="all" aria-pressed="true">
+        All
+    </button>
+
+    <button class="filter_btn" data-filter="official" aria-pressed="false">
+        Official
+    </button>
+
+    <button class="filter_btn" data-filter="created" aria-pressed="false">
+        Created
+    </button>
+</div>
+
+<div class="section_container">
+
+    <?php foreach ($quizzes as $q): ?>
+
+        <article class="section" data-type="<?= htmlspecialchars($q['type']) ?>">
+
+            <div class="section_content">
+
+                <h2>
+                    <?= htmlspecialchars($q['title']) ?>
+                </h2>
+
+                <p>
+                    <?= htmlspecialchars($q['description'] ?? '') ?>
+                </p>
+
+                <div class="section_actions">
+                    <a
+                        href="quiz.php?id=<?= (int)$q['id'] ?>"
+                        class="section_play_btn">
+
+                        QUIZZY!
+
+                    </a>
+                </div>
+
+            </div>
+
+            <?php if (!empty($q['image'])): ?>
+                <img
+                    class="section_img"
+                    src="<?= htmlspecialchars($q['image']) ?>"
+                    alt="<?= htmlspecialchars($q['title']) ?>">
+            <?php endif; ?>
+
+        </article>
+
+    <?php endforeach; ?>
+
+    <?php if (!$quizzes): ?>
+        <p>No quizzes yet.</p>
     <?php endif; ?>
 
-    <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
-        <a href="admin/admin.php">Admin</a>
-    <?php endif; ?>
-
-</nav>
-
-</header> <div class="filters" role="group" aria-label="Quiz filters">
-<button
-    class="filter_btn active"
-    data-filter="all"
-    aria-pressed="true">
-    All
-</button>
-
-<button
-    class="filter_btn"
-    data-filter="official"
-    aria-pressed="false">
-    Official
-</button>
-
-<button
-    class="filter_btn"
-    data-filter="created"
-    aria-pressed="false">
-    Created
-</button>
-
-</div> <div class="section_container">
-
-<article class="section" data-type="official">
-
-    <div class="section_content">
-
-        <h2>
-            Memes
-        </h2>
-
-        <p>
-            The memes that know everyone!
-        </p>
-
-        <div class="section_actions">
-
-            <a
-                href="quiz.php?id=1"
-                class="section_play_btn">
-
-                QUIZZY!
-
-            </a>
-
-        </div>
-
-    </div>
-
-    <img
-        class="section_img"
-        src="images/arriba.png"
-        alt="Memes">
-
-</article>
-
-<article class="section" data-type="official">
-
-    <div class="section_content">
-
-        <h2>
-            Movies
-        </h2>
-
-        <p>
-            Became the most popular movie star!
-        </p>
-
-        <div class="section_actions">
-
-            <a
-                href="quiz.php?id=2"
-                class="section_play_btn">
-
-                QUIZZY!
-
-            </a>
-
-        </div>
-
-    </div>
-
-</article>
-
-
-
-<article class="section" data-type="official">
-
-    <div class="section_content">
-
-        <h2>
-            Games
-        </h2>
-
-        <p>
-            Test your gaming knowledge!
-        </p>
-
-        <div class="section_actions">
-
-            <a
-                href="quiz.php?id=3"
-                class="section_play_btn">
-
-                QUIZZY!
-
-            </a>
-
-        </div>
-
-    </div>
-
-    <img
-        class="section_img"
-        src="images/rdr.png"
-        alt="Games">
-
-</article>
-
-
-<article class="section" data-type="official">
-
-    <div class="section_content">
-
-        <h2>
-            IT
-        </h2>
-
-        <p>
-            Become the genius in IT technologies!
-        </p>
-
-        <div class="section_actions">
-
-            <a
-                href="quiz.php?id=4"
-                class="section_play_btn">
-
-                QUIZZY!
-
-            </a>
-
-        </div>
-
-    </div>
-
-</article>
-
-
-<article class="section" data-type="official">
-
-    <div class="section_content">
-
-        <h2>
-            Entertainment
-        </h2>
-
-        <p>
-            Test your entertainment knowledge!
-        </p>
-
-        <div class="section_actions">
-
-            <a
-                href="quiz.php?id=5"
-                class="section_play_btn">
-
-                QUIZZY!
-
-            </a>
-
-        </div>
-
-    </div>
-
-    <img
-        class="section_img"
-        src="images/earth.jpg"
-        alt="Entertainment">
-
-</article>
-
-</div> </body> </html>
+</div>
+
+<script>
+// Filter buttons: All / Official / Created
+document.querySelectorAll('.filter_btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var filter = btn.dataset.filter;
+
+        document.querySelectorAll('.filter_btn').forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+            b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+
+        document.querySelectorAll('.section').forEach(function (card) {
+            card.style.display =
+                (filter === 'all' || card.dataset.type === filter) ? '' : 'none';
+        });
+    });
+});
+</script>
+
+</body>
+</html>
