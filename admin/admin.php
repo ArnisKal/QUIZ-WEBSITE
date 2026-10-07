@@ -37,7 +37,7 @@ $quizzes = $pdo->query('
             <h1>Quizzes</h1>
             <p><?= count($quizzes) ?> total</p>
         </div>
-        <a href="quiz_create.php" class="btn btn_dark">+ Create quiz</a>
+        <a href="../quiz_create.php" class="btn btn_dark">+ Create quiz</a>
     </div>
 
     <div class="admin_card">

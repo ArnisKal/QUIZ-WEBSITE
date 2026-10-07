@@ -18,7 +18,6 @@ if($_SERVER['REQUEST_METHOD']=== 'POST'){
     } elseif (mb_strlen($title) > 100) {
         $error = 'Title must be 100 characters or less';
     } else {
-        // 3. Save to the database
         $stmt = $pdo->prepare("
             INSERT INTO quizzes (title, description, image, type, created_by)
             VALUES (?, ?, ?, ?, ?)
@@ -30,8 +29,6 @@ if($_SERVER['REQUEST_METHOD']=== 'POST'){
             $type,
             $_SESSION['user_id']
         ]);
-
-        // 4. Go to the edit page to add questions
         header('Location: quiz_edit.php?id=' . $pdo->lastInsertId());
         exit;
     }
