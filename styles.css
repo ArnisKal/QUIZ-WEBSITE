@@ -381,6 +381,7 @@ main {
     border-radius: 18px;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .filter_btn:hover {
@@ -715,4 +716,4 @@ main {
     color: #555;
 }
 
-
+/*quiz game design*/
