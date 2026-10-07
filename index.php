@@ -1,5 +1,6 @@
 <?php session_start();?>
 <?php require_once 'auth.php'; ?>
+<?php require_once 'site_check.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

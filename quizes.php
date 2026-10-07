@@ -1,5 +1,10 @@
 <?php
+if (($_SESSION['role'] ?? '') === 'admin') {
+    header('Location: admin/admin.php');
+    exit;
+}
 session_start();
+require_once 'site_check.php';
 require_once 'database.php';
 
 // Only quizzes that already have at least one question are shown to players

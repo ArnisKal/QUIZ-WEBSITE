@@ -19,6 +19,11 @@ function renumberQuestions(PDO $pdo, int $quizId): void{
     }
 }
 
+$message = $_SESSION['flash'] ?? '';
+unset($_SESSION['flash']);
+$old = ['text' => '', 'answers' => [], 'correct' => 0];
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -207,19 +212,28 @@ $answersStmt = $pdo->prepare("SELECT * FROM answers WHERE question_id = ? ORDER 
     </fieldset>
 <?php endforeach; ?>
 
-<h2>Add a question</h2>
-<form method="post">
+<h2 id="add-question">Add a question</h2>
+
+<?php if ($error && ($action ?? '') === 'add_question'): ?>
+    <p style="color:red"><?= htmlspecialchars($error) ?></p>
+<?php endif; ?>
+
+<form method="post" action="#add-question">
     <input type="hidden" name="action" value="add_question">
-    <p><input name="question_text" placeholder="Question text" style="width:100%" required></p>
+    <p>
+        <input name="question_text" placeholder="Question text" style="width:100%" required
+               value="<?= htmlspecialchars($old['text']) ?>">
+    </p>
 
     <?php for ($i = 0; $i < 4; $i++): ?>
         <p>
-            <input type="radio" name="correct" value="<?= $i ?>" <?= $i === 0 ? 'checked' : '' ?>>
-            <input name="answers[<?= $i ?>]" placeholder="Option <?= $i + 1 ?>">
+            <input type="radio" name="correct" value="<?= $i ?>"
+                   <?= $i === (int)$old['correct'] ? 'checked' : '' ?>>
+            <input name="answers[<?= $i ?>]" placeholder="Option <?= $i + 1 ?>"
+                   value="<?= htmlspecialchars($old['answers'][$i] ?? '') ?>">
         </p>
     <?php endfor; ?>
 
-    <p><small>The circle on the left marks the correct answer. Empty options are ignored.</small></p>
     <button type="submit">Add question</button>
 </form>
 
