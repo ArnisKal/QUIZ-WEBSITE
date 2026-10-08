@@ -74,8 +74,7 @@ $quizzes = $pdo->query('
                             </td>
                             <td class="col_actions">
                                 <div class="admin_actions">
-                                    <a class="btn btn_play"   href="../quiz.php?id=<?= (int)$q['id'] ?>">Play</a>
-                                    <a class="btn"            href="quiz_edit.php?id=<?= (int)$q['id'] ?>">Edit</a>
+                                    <a class="btn" href="quiz_edit.php?id=<?= (int)$q['id'] ?>">Edit</a>
                                     <a class="btn btn_danger" href="quiz_delete.php?id=<?= (int)$q['id'] ?>">Delete</a>
                                 </div>
                             </td>

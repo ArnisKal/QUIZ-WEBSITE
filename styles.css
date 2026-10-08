@@ -715,5 +715,79 @@ main {
     text-align: center;
     color: #555;
 }
+/*Quiz create design*/
 
-/*quiz game design*/
+.form_card {
+    max-width: 640px;
+    padding: 2rem;
+    background: white;
+    border: 1px solid #dfe3f0;
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.form_stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* textarea and select share the look of .field input */
+
+.field textarea,
+.field select {
+    padding: 0 14px;
+    font: inherit;
+    background: whitesmoke;
+    border: 1px solid #dfe3f0;
+    outline: none;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.field select {
+    height: 42px;
+    border-radius: 21px;
+    cursor: pointer;
+}
+
+.field textarea {
+    min-height: 110px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    resize: vertical;
+    line-height: 1.4;
+}
+
+.field textarea:focus,
+.field select:focus {
+    background: white;
+    border-color: #656666;
+    box-shadow: 0 0 12px rgba(101, 102, 102, 0.7);
+}
+
+.field_hint {
+    font-weight: normal;
+    color: #888;
+}
+
+.form_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 0.5rem;
+}
+
+.form_actions .btn {
+    height: 40px;
+    padding: 0 22px;
+}
+
+.form_error {
+    margin-bottom: 1.25rem;
+    padding: 12px 16px;
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 12px;
+    font-weight: 600;
+}

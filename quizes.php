@@ -1,13 +1,12 @@
 <?php
+session_start();
 if (($_SESSION['role'] ?? '') === 'admin') {
     header('Location: admin/admin.php');
     exit;
 }
-session_start();
 require_once 'site_check.php';
 require_once 'database.php';
 
-// Only quizzes that already have at least one question are shown to players
 $quizzes = $pdo->query("
     SELECT q.*
     FROM quizzes q
@@ -138,7 +137,6 @@ $quizzes = $pdo->query("
 </div>
 
 <script>
-// Filter buttons: All / Official / Created
 document.querySelectorAll('.filter_btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var filter = btn.dataset.filter;

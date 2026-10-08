@@ -7,8 +7,8 @@ $description = '';
 $image = '';
 $type = 'official';
 
-if($_SERVER['REQUEST_METHOD']=== 'POST'){
-    $title = trim($_POST['title'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title       = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $image       = trim($_POST['image'] ?? '');
     $type        = ($_POST['type'] ?? '') === 'created' ? 'created' : 'official';
@@ -41,45 +41,66 @@ if($_SERVER['REQUEST_METHOD']=== 'POST'){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz</title>
-    <link rel="stylesheet" href="../styles.css">
+    <!-- Page is in the site root, so no "../" -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<h1>New Quiz</h1>
-<p><a href="admin/admin.php">Back to admin panel</a></p>
+<header class="header">
+    <a class="logo" href="index.php">QUIZ</a>
+    <nav class="nav">
+        <a href="admin/admin.php">Back to admin panel</a>
+    </nav>
+</header>
 
-<?php if ($error): ?>
-    <p style="color:red"><?= htmlspecialchars($error) ?></p>
-<?php endif; ?>
+<main class="admin_main">
+    <div class="admin_top">
+        <div>
+            <h1>New quiz <span class="admin_badge">Admin</span></h1>
+            <p>Fill in the basics. You'll add questions on the next step.</p>
+        </div>
+    </div>
 
-<form method="post">
-    <p>
-        <label>Title<br>
-            <input name="title" maxlength="100" required
-                   value="<?= htmlspecialchars($title) ?>">
-        </label>
-    </p>
-    <p>
-        <label>Description<br>
-            <textarea name="description" rows="3"><?= htmlspecialchars($description) ?></textarea>
-        </label>
-    </p>
-    <p>
-        <label>Image path (optional)<br>
-            <input name="image" placeholder="images/pic.png"
-                   value="<?= htmlspecialchars($image) ?>">
-        </label>
-    </p>
-    <p>
-        <label>Type<br>
-            <select name="type">
-                <option value="official" <?= $type === 'official' ? 'selected' : '' ?>>Official</option>
-                <option value="created"  <?= $type === 'created'  ? 'selected' : '' ?>>Created</option>
-            </select>
-        </label>
-    </p>
-    <button type="submit">Create</button>
-</form>
+    <div class="form_card">
+        <?php if ($error): ?>
+            <p class="form_error" role="alert"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
+
+        <form method="post" class="form_stack">
+            <div class="field">
+                <label for="title">Title</label>
+                <input id="title" name="title" maxlength="100" required
+                       placeholder="e.g. World capitals"
+                       value="<?= htmlspecialchars($title) ?>">
+            </div>
+
+            <div class="field">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4"
+                          placeholder="What is this quiz about?"><?= htmlspecialchars($description) ?></textarea>
+            </div>
+
+            <div class="field">
+                <label for="image">Image path <span class="field_hint">(optional)</span></label>
+                <input id="image" name="image" placeholder="images/pic.png"
+                       value="<?= htmlspecialchars($image) ?>">
+            </div>
+
+            <div class="field">
+                <label for="type">Type</label>
+                <select id="type" name="type">
+                    <option value="official" <?= $type === 'official' ? 'selected' : '' ?>>Official</option>
+                    <option value="created"  <?= $type === 'created'  ? 'selected' : '' ?>>Created</option>
+                </select>
+            </div>
+
+            <div class="form_actions">
+                <a class="btn" href="admin/admin.php">Cancel</a>
+                <button type="submit" class="btn btn_dark">Create quiz</button>
+            </div>
+        </form>
+    </div>
+</main>
 
 </body>
 </html>
