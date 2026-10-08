@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-require_once __DIR__ . '/site_check.php';   
+require_once __DIR__ . '/site_check.php';
 require_once __DIR__ . '/database.php';
 
 $id = (int)($_GET['id'] ?? 0);
@@ -23,30 +23,24 @@ $stmt = $pdo->prepare("SELECT * FROM questions WHERE quiz_id = ? ORDER BY questi
 $stmt->execute([$id]);
 $questions = $stmt->fetchAll();
 
-// Answers for each question
-$answersQuestions = [];
+// Questions + answers in one array for JavaScript
 $stmt = $pdo->prepare("SELECT id, answer_text, is_correct FROM answers WHERE question_id = ? ORDER BY id");
+$quizData = [];
 foreach ($questions as $q) {
     $stmt->execute([$q['id']]);
-    $answersQuestions[$q['id']] = $stmt->fetchAll();
-}
-
-// Check answers only after the form is submitted
-$submitted = $_SERVER['REQUEST_METHOD'] === 'POST';
-$chosen = [];
-$score = 0;
-
-if ($submitted) {
-    foreach ($questions as $q) {
-        $qid = (int)$q['id'];
-        $chosen[$qid] = (int)($_POST['q'][$qid] ?? 0);
-
-        foreach ($answersQuestions[$qid] as $a) {
-            if ((int)$a['id'] === $chosen[$qid] && $a['is_correct']) {
-                $score++;
-            }
-        }
+    $answers = [];
+    foreach ($stmt->fetchAll() as $a) {
+        $answers[] = [
+            'id'      => (int)$a['id'],
+            'text'    => $a['answer_text'],
+            'correct' => (bool)$a['is_correct'],
+        ];
     }
+    $quizData[] = [
+        'id'      => (int)$q['id'],
+        'text'    => $q['question_text'],
+        'answers' => $answers,
+    ];
 }
 ?>
 <!DOCTYPE html>
@@ -60,69 +54,150 @@ if ($submitted) {
 <body>
 
 <header class="header">
-    <a href="quizes.php" class="logo">QUIZZITY</a>
+    <a href="index.php" class="logo">QUIZZITY</a>
+
+    <nav class="nav">
+        <a href="index.php">Quizzes</a>
+        <a href="leaderboards.php">Leaderboards</a>
+    </nav>
 </header>
 
-<main style="max-width:700px; margin:30px auto; padding:0 16px;">
-    <h1><?= htmlspecialchars($quiz['title']) ?></h1>
-    <p><?= htmlspecialchars($quiz['description'] ?? '') ?></p>
+<main class="play">
 
-    <?php if (!$questions): ?>
+<?php if (!$quizData): ?>
 
+    <div class="play_result" style="display:block">
+        <h1><?= htmlspecialchars($quiz['title']) ?></h1>
         <p>This quiz has no questions yet.</p>
-        <a href="quizes.php">← Back to quizzes</a>
+        <a href="index.php" class="btn btn_dark">Back to quizzes</a>
+    </div>
 
-    <?php elseif ($submitted): ?>
+<?php else: ?>
 
-        <h2>Your result: <?= $score ?> / <?= count($questions) ?></h2>
+    <div id="game">
+        <div class="play_top">
+            <h1 class="play_title"><?= htmlspecialchars($quiz['title']) ?></h1>
+            <span class="play_counter" id="counter"></span>
+        </div>
+        <div class="play_progress"><div class="play_bar" id="bar"></div></div>
 
-        <?php foreach ($questions as $n => $q): ?>
-            <fieldset style="margin-bottom:16px">
-                <legend><?= $n + 1 ?>. <?= htmlspecialchars($q['question_text']) ?></legend>
+        <div class="play_question" id="questionText"></div>
+        <div class="play_answers" id="answers"></div>
 
-                <?php foreach ($answersQuestions[$q['id']] as $a): ?>
-                    <?php
-                        $isChosen  = (int)$a['id'] === ($chosen[(int)$q['id']] ?? 0);
-                        $isCorrect = (bool)$a['is_correct'];
-                        $style = '';
-                        $mark  = '';
-                        if ($isCorrect)    { $style = 'color:green;font-weight:bold'; $mark = ' ✔'; }
-                        elseif ($isChosen) { $style = 'color:red'; $mark = ' ✘'; }
-                    ?>
-                    <div style="<?= $style ?>">
-                        <?= htmlspecialchars($a['answer_text']) ?><?= $mark ?>
-                        <?= $isChosen ? '(your answer)' : '' ?>
-                    </div>
-                <?php endforeach; ?>
-            </fieldset>
-        <?php endforeach; ?>
+        <div class="play_footer">
+            <span class="play_feedback" id="feedback"></span>
+            <button class="play_next" id="nextBtn" type="button">Next</button>
+        </div>
+    </div>
 
-        <p>
-            <a href="quiz.php?id=<?= $id ?>">Play again</a> |
-            <a href="quizes.php">Back to quizzes</a>
-        </p>
+    <div class="play_result" id="result">
+        <h1><?= htmlspecialchars($quiz['title']) ?></h1>
+        <div class="play_score" id="scoreText"></div>
+        <p id="scoreMsg"></p>
+        <a href="quiz.php?id=<?= $id ?>" class="btn btn_play">Play again</a>
+        <a href="index.php" class="btn">Back to quizzes</a>
+    </div>
 
-    <?php else: ?>
+<?php endif; ?>
 
-        <form method="post">
-            <?php foreach ($questions as $n => $q): ?>
-                <fieldset style="margin-bottom:16px">
-                    <legend><?= $n + 1 ?>. <?= htmlspecialchars($q['question_text']) ?></legend>
-
-                    <?php foreach ($answersQuestions[$q['id']] as $a): ?>
-                        <label style="display:block; margin:6px 0">
-                            <input type="radio" name="q[<?= (int)$q['id'] ?>]" value="<?= (int)$a['id'] ?>" required>
-                            <?= htmlspecialchars($a['answer_text']) ?>
-                        </label>
-                    <?php endforeach; ?>
-                </fieldset>
-            <?php endforeach; ?>
-
-            <button type="submit">Finish</button>
-        </form>
-
-    <?php endif; ?>
 </main>
+
+<?php if ($quizData): ?>
+<script>
+var QUESTIONS = <?= json_encode($quizData, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
+var current = 0;
+var score = 0;
+var locked = false;
+
+var elQuestion = document.getElementById('questionText');
+var elAnswers  = document.getElementById('answers');
+var elFeedback = document.getElementById('feedback');
+var elNext     = document.getElementById('nextBtn');
+var elCounter  = document.getElementById('counter');
+var elBar      = document.getElementById('bar');
+
+function showQuestion() {
+    var q = QUESTIONS[current];
+    locked = false;
+
+    elQuestion.textContent = q.text;
+    elFeedback.textContent = '';
+    elFeedback.className = 'play_feedback';
+    elNext.style.display = 'none';
+    elAnswers.innerHTML = '';
+    elCounter.textContent = (current + 1) + ' / ' + QUESTIONS.length;
+    elBar.style.width = (current / QUESTIONS.length * 100) + '%';
+
+    q.answers.forEach(function (a, i) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'play_btn';
+
+        var text = document.createElement('span');
+        text.className = 'play_text';
+        text.textContent = a.text;
+
+        btn.appendChild(text);
+        btn.addEventListener('click', function () { choose(btn, a); });
+        elAnswers.appendChild(btn);
+    });
+}
+
+function choose(btn, answer) {
+    if (locked) return;
+    locked = true;
+
+    var q = QUESTIONS[current];
+    var buttons = elAnswers.querySelectorAll('.play_btn');
+
+    q.answers.forEach(function (a, i) {
+        buttons[i].disabled = true;
+        if (a.correct) {
+            buttons[i].classList.add('right');
+        } else if (buttons[i] === btn) {
+            buttons[i].classList.add('wrong');
+        } else {
+            buttons[i].classList.add('dim');
+        }
+    });
+
+    if (answer.correct) {
+        score++;
+        elFeedback.textContent = 'Correct!';
+        elFeedback.classList.add('ok');
+    } else {
+        elFeedback.textContent = 'Wrong answer';
+        elFeedback.classList.add('bad');
+    }
+
+    elNext.textContent = (current === QUESTIONS.length - 1) ? 'See result' : 'Next';
+    elNext.style.display = 'inline-block';
+    elNext.focus();
+}
+
+elNext.addEventListener('click', function () {
+    current++;
+    if (current < QUESTIONS.length) {
+        showQuestion();
+    } else {
+        finish();
+    }
+});
+
+function finish() {
+    document.getElementById('game').style.display = 'none';
+    document.getElementById('scoreText').textContent = score + ' / ' + QUESTIONS.length;
+
+    var pct = score / QUESTIONS.length;
+    document.getElementById('scoreMsg').textContent =
+        pct === 1 ? 'Perfect!' : pct >= 0.5 ? 'GJ!' : 'Try again!';
+    document.getElementById('result').style.display = 'block';
+}
+
+showQuestion();
+</script>
+<?php endif; ?>
 
 </body>
 </html>

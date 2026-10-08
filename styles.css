@@ -791,3 +791,197 @@ main {
     border-radius: 12px;
     font-weight: 600;
 }
+
+/*quiz game design*/
+/* Quiz game page (quiz.php) - paste at the end of styles.css */
+
+.play {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.play_top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.play_title {
+    font-size: 1.4rem;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.play_counter {
+    padding: 4px 14px;
+    font-weight: 600;
+    background: white;
+    border: 1px solid #dfe3f0;
+    border-radius: 18px;
+    white-space: nowrap;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.play_progress {
+    height: 8px;
+    overflow: hidden;
+    background: #dfe3f0;
+    border-radius: 4px;
+}
+
+.play_bar {
+    width: 0;
+    height: 100%;
+    background: #ea580c;
+    transition: width 0.3s ease;
+}
+
+.play_question {
+    margin: 1.5rem 0;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    background: white;
+    border: 1px solid #dfe3f0;
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.play_answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.play_btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+    padding: 1rem 3rem;
+    font: inherit;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    color: inherit;
+    background: rgb(255, 255, 255);
+    border: 2px solid #dfe3f0;
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    cursor: pointer;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+}
+
+.play_btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 0 12px rgba(85, 85, 85, 0.7);
+}
+
+.play_btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.play_btn:focus-visible {
+    outline: 2px solid #656666;
+    outline-offset: 2px;
+}
+
+.play_btn:disabled {
+    cursor: default;
+}
+
+.play_text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.play_btn.right {
+    background: #dcfce7;
+    border-color: #15803d;
+}
+
+.play_btn.wrong {
+    background: #fef2f2;
+    border-color: #dc2626;
+}
+
+.play_btn.dim {
+    opacity: 0.45;
+}
+
+.play_btn.right::after,
+.play_btn.wrong::after {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.6rem;
+}
+
+.play_btn.right::after { content: "\2714"; color: #15803d; }
+.play_btn.wrong::after { content: "\2718"; color: #dc2626; }
+
+.play_footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 48px;
+    margin-top: 1.25rem;
+}
+
+.play_feedback {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.play_feedback.ok  { color: #15803d; }
+.play_feedback.bad { color: #b91c1c; }
+
+.play_next {
+    display: none;
+    height: 44px;
+    padding: 0 28px;
+    font: inherit;
+    font-weight: bold;
+    color: white;
+    background: #020202;
+    border: none;
+    border-radius: 22px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.15s ease;
+}
+
+.play_next:hover { box-shadow: 0 0 12px rgba(101, 102, 102, 0.7); }
+.play_next:active { transform: scale(0.98); }
+.play_next:focus-visible { outline: 2px solid #656666; outline-offset: 2px; }
+
+.play_result {
+    display: none;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    background: white;
+    border: 1px solid #dfe3f0;
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.play_score {
+    margin: 0.5rem 0;
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    font-weight: 800;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.play_result p { color: #555; margin-bottom: 1.5rem; }
+
+.play_result .btn {
+    height: 44px;
+    padding: 0 24px;
+    margin: 0 4px;
+}
+
