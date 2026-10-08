@@ -22,8 +22,6 @@ if (!$quiz) {
 $stmt = $pdo->prepare("SELECT * FROM questions WHERE quiz_id = ? ORDER BY question_number, id");
 $stmt->execute([$id]);
 $questions = $stmt->fetchAll();
-
-// Questions + answers in one array for JavaScript
 $stmt = $pdo->prepare("SELECT id, answer_text, is_correct FROM answers WHERE question_id = ? ORDER BY id");
 $quizData = [];
 foreach ($questions as $q) {
