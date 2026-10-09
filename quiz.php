@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 require_once __DIR__ . '/site_check.php';
 require_once __DIR__ . '/database.php';
@@ -125,7 +122,7 @@ function showQuestion() {
     elNext.style.display = 'none';
     elAnswers.innerHTML = '';
     elCounter.textContent = (current + 1) + ' / ' + QUESTIONS.length;
-    elBar.style.width = (current / QUESTIONS.length * 100) + '%';
+    elBar.style.width = ((current + 1) / QUESTIONS.length * 100) + '%';
 
     q.answers.forEach(function (a, i) {
         var btn = document.createElement('button');

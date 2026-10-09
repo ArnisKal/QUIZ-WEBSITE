@@ -13,7 +13,7 @@ if (!$quiz) {
 }
 
 $text    = '';
-$options = ['', '', '', ''];   
+$options = ['', '', '', '', '', '']; 
 $correct = 0;
 
 if ($editing) {

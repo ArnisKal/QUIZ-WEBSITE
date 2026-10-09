@@ -22,6 +22,7 @@ function renumberQuestions(PDO $pdo, int $quizId): void {
 $message = $_SESSION['flash'] ?? '';
 unset($_SESSION['flash']);
 $error = '';
+$posted = null;   // введённые значения формы, чтобы не терять их при ошибке
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -30,18 +31,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title = trim($_POST['title'] ?? '');
         $image = trim($_POST['image'] ?? '');
         $type  = ($_POST['type'] ?? '') === 'created' ? 'created' : 'official';
+        $description = trim($_POST['description'] ?? '');
+
+        // Сколько вопросов сейчас в квизе
+        $cnt = $pdo->prepare('SELECT COUNT(*) FROM questions WHERE quiz_id = ?');
+        $cnt->execute([$id]);
+        $questionCount = (int)$cnt->fetchColumn();
 
         if ($title === '') {
             $error = 'Title cannot be empty';
         } elseif (mb_strlen($title) > 100) {
             $error = 'Title must be 100 characters or less';
+        } elseif ($questionCount === 0) {
+            $error = 'Add at least one question before saving the quiz';
         } else {
             $pdo->prepare("UPDATE quizzes SET title = ?, description = ?, image = ?, type = ? WHERE id = ?")
-                ->execute([$title, trim($_POST['description'] ?? ''), $image !== '' ? $image : null, $type, $id]);
+                ->execute([$title, $description, $image !== '' ? $image : null, $type, $id]);
             $_SESSION['flash'] = 'Quiz saved';
             header("Location: quiz_edit.php?id=$id");
             exit;
         }
+
+        // Была ошибка: запоминаем введённое, чтобы показать в форме
+        $posted = ['title' => $title, 'description' => $description, 'image' => $image, 'type' => $type];
     }
 
     if ($action === 'delete_question') {
@@ -57,6 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->prepare("SELECT * FROM quizzes WHERE id = ?");
 $stmt->execute([$id]);
 $quiz = $stmt->fetch();
+
+// Если сохранение не прошло, показываем то, что ввёл админ, а не данные из базы
+if ($posted) {
+    $quiz = array_merge($quiz, $posted);
+}
 
 $stmt = $pdo->prepare(
     "SELECT q.*, (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) AS answers_count
