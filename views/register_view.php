@@ -24,7 +24,6 @@
                 </div>
             <?php endif; ?>
 
-            <!-- CSRF -->
             <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
 
             <div class="field">
@@ -43,14 +42,36 @@
 
             <div class="field">
                 <label for="password">Password</label>
-                <input id="password" name="password" type="password"
-                       placeholder="Enter password..." autocomplete="new-password" required>
+                <div class="password_wrap">
+                    <input id="password" name="password" type="password"
+                           placeholder="Enter password..." autocomplete="new-password" required>
+
+                    <button type="button" class="password_toggle" aria-label="Show password">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                            <line class="eye_slash" x1="3" y1="3" x2="21" y2="21"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="field">
                 <label for="password_repeat">Repeat password</label>
-                <input id="password_repeat" name="password_repeat" type="password"
-                       placeholder="Repeat password..." autocomplete="new-password" required>
+                <div class="password_wrap">
+                    <input id="password_repeat" name="password_repeat" type="password"
+                           placeholder="Repeat password..." autocomplete="new-password" required>
+
+                    <button type="button" class="password_toggle" aria-label="Show password">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                            <line class="eye_slash" x1="3" y1="3" x2="21" y2="21"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="auth-button">Register</button>
@@ -61,6 +82,22 @@
 
         </form>
     </main>
+
+<script>
+
+document.querySelectorAll('.password_wrap').forEach(function (wrap) {
+    var input = wrap.querySelector('input');
+    var btn = wrap.querySelector('.password_toggle');
+
+    btn.addEventListener('click', function () {
+        var show = input.type === 'password';
+
+        input.type = show ? 'text' : 'password';
+        btn.classList.toggle('is_visible', show);
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+});
+</script>
 
 </body>
 </html>
