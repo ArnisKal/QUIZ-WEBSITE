@@ -83,6 +83,46 @@
 
     </section>
 
+    <section class="faq">
+    <h2 class="faq_title">FAQ</h2>
+
+    <details class="faq_item" open>
+        <summary>
+            <span>What is Quizzity?</span>
+            <span class="faq_line"></span>
+            <span class="faq_arrow"></span>
+        </summary>
+        <p class="faq_answer">
+            Quizzity is an online quiz platform where you can play quizzes
+            made by us and compete on the leaderboards.
+        </p>
+    </details>
+
+    <details class="faq_item">
+        <summary>
+            <span>How I can create my own quizz?</span>
+            <span class="faq_line"></span>
+            <span class="faq_arrow"></span>
+        </summary>
+        <p class="faq_answer">
+            For now you can't, only admin can create our quizzes!
+        </p>
+    </details>
+
+     <details class="faq_item">
+        <summary>
+            <span>Do I need to register my account to play Quizzity?</span>
+            <span class="faq_line"></span>
+            <span class="faq_arrow"></span>
+        </summary>
+        <p class="faq_answer">
+            Yes, you do. You don't have necessarily have to register using Google.
+        </p>
+    </details>       
+</section>
+
+
+
    <footer class="footer">
     <nav class="footer_links">
         <a href="https://github.com/ArnisKal/QUIZ-WEBSITE" aria-label="Github"><img src="images/github.png" width="40" height="40" alt="Github"></a>
