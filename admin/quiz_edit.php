@@ -22,7 +22,7 @@ function renumberQuestions(PDO $pdo, int $quizId): void {
 $message = $_SESSION['flash'] ?? '';
 unset($_SESSION['flash']);
 $error = '';
-$posted = null;   // введённые значения формы, чтобы не терять их при ошибке
+$posted = null;  
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -33,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $type  = ($_POST['type'] ?? '') === 'created' ? 'created' : 'official';
         $description = trim($_POST['description'] ?? '');
 
-        // Сколько вопросов сейчас в квизе
         $cnt = $pdo->prepare('SELECT COUNT(*) FROM questions WHERE quiz_id = ?');
         $cnt->execute([$id]);
         $questionCount = (int)$cnt->fetchColumn();
@@ -51,8 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: quiz_edit.php?id=$id");
             exit;
         }
-
-        // Была ошибка: запоминаем введённое, чтобы показать в форме
         $posted = ['title' => $title, 'description' => $description, 'image' => $image, 'type' => $type];
     }
 
@@ -70,7 +67,6 @@ $stmt = $pdo->prepare("SELECT * FROM quizzes WHERE id = ?");
 $stmt->execute([$id]);
 $quiz = $stmt->fetch();
 
-// Если сохранение не прошло, показываем то, что ввёл админ, а не данные из базы
 if ($posted) {
     $quiz = array_merge($quiz, $posted);
 }

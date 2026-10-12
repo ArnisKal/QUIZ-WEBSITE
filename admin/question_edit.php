@@ -1,6 +1,9 @@
 <?php
 require_once 'admin_check.php';
 
+const MIN_ANSWERS = 2;
+const MAX_ANSWERS = 8;  
+
 $quizId = (int)($_GET['quiz_id'] ?? 0);
 $id     = (int)($_GET['id'] ?? 0);
 $editing = $id > 0;
@@ -13,7 +16,7 @@ if (!$quiz) {
 }
 
 $text    = '';
-$options = ['', '', '', '', '', '']; 
+$options = ['', '', '', '']; 
 $correct = 0;
 
 if ($editing) {
@@ -47,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $text    = trim($_POST['question_text'] ?? '');
     $posted  = is_array($_POST['answers'] ?? null) ? array_filter($_POST['answers'], 'is_string') : [];
     $correct = (int)($_POST['correct'] ?? 0);
-    $options = $posted;                     
+    $options = $posted;
 
     if ($text === '') {
         $error = 'Please enter the question text';
@@ -80,8 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $filled = array_filter($posted, fn($a) => trim($a) !== '');
 
-        if (count($filled) < 2) {
-            $error = 'At least 2 answer options are required';
+        if (count($filled) < MIN_ANSWERS) {
+            $error = 'At least ' . MIN_ANSWERS . ' answer options are required';
+        } elseif (count($filled) > MAX_ANSWERS) {
+            $error = 'No more than ' . MAX_ANSWERS . ' answer options';
         } elseif (!isset($filled[$correct])) {
             $error = 'The correct answer cannot be empty';
         } else {
@@ -116,6 +121,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+if (!$editing) {
+    $nextKey = $options ? max(array_map('intval', array_keys($options))) + 1 : 0;
+    while (count($options) < 4) {
+        $options[$nextKey++] = '';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -146,8 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="field">
-            <label>Answer options <span class="field_hint">(select the correct one)</span></label>
-            <div class="answers_list">
+            <label>Answer options <span class="field_hint">(select the correct one<?= $editing ? '' : ', ' . MIN_ANSWERS . '–' . MAX_ANSWERS . ' options' ?>)</span></label>
+            <div class="answers_list" id="answersList">
                 <?php foreach ($options as $key => $optText): ?>
                     <div class="answer_row">
                         <input type="radio" name="correct" value="<?= (int)$key ?>"
@@ -156,9 +167,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                value="<?= htmlspecialchars($optText) ?>"
                                placeholder="Option <?= (int)array_search($key, array_keys($options)) + 1 ?>"
                                <?= $editing ? 'required' : '' ?>>
+                        <?php if (!$editing): ?>
+                            <button type="button" class="btn btn_danger remove_btn" aria-label="Remove option">✕</button>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if (!$editing): ?>
+                <button type="button" class="btn" id="addBtn" style="margin-top:.6rem">+ Add answer</button>
+            <?php endif; ?>
         </div>
 
         <div class="form_actions">
@@ -172,5 +190,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
 </div>
+
+<?php if (!$editing): ?>
+<script>
+var MIN = <?= MIN_ANSWERS ?>;
+var MAX = <?= MAX_ANSWERS ?>;
+var list   = document.getElementById('answersList');
+var addBtn = document.getElementById('addBtn');
+var nextKey = 0;
+list.querySelectorAll('input[type="radio"]').forEach(function (r) {
+    nextKey = Math.max(nextKey, parseInt(r.value, 10) + 1);
+});
+
+function refresh() {
+    var rows = list.querySelectorAll('.answer_row');
+
+    rows.forEach(function (row, i) {
+        row.querySelector('input[type="text"]').placeholder = 'Option ' + (i + 1);
+        row.querySelector('.remove_btn').disabled = rows.length <= MIN;
+    });
+
+    addBtn.style.display = rows.length >= MAX ? 'none' : 'inline-block';
+
+    if (!list.querySelector('input[type="radio"]:checked') && rows.length) {
+        rows[0].querySelector('input[type="radio"]').checked = true;
+    }
+}
+
+addBtn.addEventListener('click', function () {
+    if (list.querySelectorAll('.answer_row').length >= MAX) return;
+
+    var row = document.createElement('div');
+    row.className = 'answer_row';
+    row.innerHTML =
+        '<input type="radio" name="correct" value="' + nextKey + '" aria-label="Correct answer">' +
+        '<input type="text" name="answers[' + nextKey + ']">' +
+        '<button type="button" class="btn btn_danger remove_btn" aria-label="Remove option">✕</button>';
+    nextKey++;
+
+    list.appendChild(row);
+    refresh();
+    row.querySelector('input[type="text"]').focus();
+});
+
+list.addEventListener('click', function (e) {
+    if (!e.target.classList.contains('remove_btn')) return;
+    if (list.querySelectorAll('.answer_row').length <= MIN) return;
+    e.target.closest('.answer_row').remove();
+    refresh();
+});
+
+refresh();
+</script>
+<?php endif; ?>
+
 </body>
 </html>

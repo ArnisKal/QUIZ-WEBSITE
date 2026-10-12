@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $type,
             $_SESSION['user_id']
         ]);
-        header('Location: quiz_edit.php?id=' . $pdo->lastInsertId());
+        header('Location: admin/question_edit.php?quiz_id=' . $pdo->lastInsertId());
         exit;
     }
 }
@@ -41,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz</title>
-    <!-- Page is in the site root, so no "../" -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -82,8 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="field">
                 <label for="image">Image path <span class="field_hint">(optional)</span></label>
-                <input id="image" name="image" placeholder="images/pic.png"
-                       value="<?= htmlspecialchars($image) ?>">
+                <input id="image" name="image" placeholder="images/pic.png" value="<?= htmlspecialchars($image) ?>">
             </div>
 
             <div class="field">

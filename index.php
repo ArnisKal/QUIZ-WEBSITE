@@ -8,13 +8,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quizzity</title>
     <link rel="stylesheet" href="styles.css">
+    
 </head>
 
 <body>
 
 <header class="header">
 
-    <h1>QUIZZITY</h1>
+   <div class="header_left">
+
+        <div class="menu">
+            <button type="button" class="menu_btn" id="menuBtn" aria-label="Menu">
+                <img src="images/threeBar.png" alt="" width="30">
+            </button>
+
+           <div class="menu_list" id="menuList">
+                <a href="settings.php">Settings</a>
+                <a href="language.php">Language</a>
+                <a href="account.php">Account</a>
+                <a href="liked.php">Liked quizzes</a>
+                <a href="leaderboards.php">Leaderboard</a>
+            </div>
+        </div>
+
+        <script>
+            var menuBtn = document.getElementById('menuBtn')
+            var menuList = document.getElementById('menuList')
+
+            menuBtn.addEventListener('click', function(){
+               menuList.classList.toggle('open');
+            });
+        </script>
+
+        <h1>QUIZZITY</h1>
+
+    </div>
+
+   
 
     <input type="search" class="search" placeholder="Search quizzes...">
 
@@ -32,7 +62,9 @@
                 <a href="admin/admin.php">Admin</a>
             <?php endif; ?>
 
-            <a href="logout.php">Logout</a>
+            <a href="logout.php">Logout
+                <img src="images/logout.png">
+            </a>
 
         <?php else: ?>
 
