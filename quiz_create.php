@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $type,
             $_SESSION['user_id']
         ]);
+        $_SESSION['flash'] = 'Quiz created';
         header('Location: admin/question_edit.php?quiz_id=' . $pdo->lastInsertId());
         exit;
     }
