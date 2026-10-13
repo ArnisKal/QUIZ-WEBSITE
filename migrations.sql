@@ -36,3 +36,14 @@ CREATE TABLE IF NOT EXISTS answers (
     is_correct BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS favourites (
+    user_id INT UNSIGNED NOT NULL,
+    quiz_id INT UNSIGNED NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, quiz_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+ALTER TABLE users ADD COLUMN country CHAR(2) NULL;

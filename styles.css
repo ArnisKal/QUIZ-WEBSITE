@@ -1560,3 +1560,122 @@ main {
 .form_error::before {
     content: "\2718\00a0\00a0";    
 }
+
+.fav_btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: white;
+    border: 1px solid #dfe3f0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.fav_btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(101, 102, 102, 0.7);
+}
+
+.fav_btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;          
+    stroke: #555;
+    stroke-width: 2;
+}
+
+.fav_btn.active svg {
+    fill: #dc2626;       
+    stroke: #dc2626;
+}
+
+.nav a.avatar {
+    width: 40px;
+    height: 40px;
+    padding: 0;                    
+    justify-content: center;
+    overflow: hidden;
+    background: #c4c9d6;           
+    border-radius: 50%;
+}
+
+.nav a.avatar:hover {
+    background: #aab0c0;
+}
+
+.avatar svg {
+    width: 26px;
+    height: 26px;
+    margin-top: 6px;               
+    fill: white;
+}
+
+/* "Profile information" rows (account.php) - paste at the end of styles.css */
+
+.pi {
+    border-top: 1px solid #dfe3f0;
+}
+
+.pi_row {
+    border-bottom: 1px solid #dfe3f0;
+}
+
+.pi_row summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 16px 0;
+    list-style: none;
+    cursor: pointer;
+}
+
+.pi_row summary::-webkit-details-marker { display: none; }
+
+.pi_label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #777;
+}
+
+.pi_value {
+    font-size: 1.15rem;
+    font-weight: bold;
+}
+
+.pi_edit {
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid #656666;
+    border-radius: 18px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pi_row summary:hover .pi_edit,
+.pi_row[open] .pi_edit {
+    color: white;
+    background: #020202;
+}
+
+.pi_row summary:focus-visible {
+    outline: 2px solid #656666;
+    outline-offset: 2px;
+}
+
+.pi_form {
+    padding: 4px 0 20px;
+}
+
+.flag {
+    margin-left: 6px;
+    vertical-align: middle;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}

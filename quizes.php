@@ -7,12 +7,21 @@ if (($_SESSION['role'] ?? '') === 'admin') {
 require_once 'site_check.php';
 require_once 'database.php';
 
+// Only quizzes that already have at least one question are shown to players
 $quizzes = $pdo->query("
     SELECT q.*
     FROM quizzes q
     WHERE EXISTS (SELECT 1 FROM questions qs WHERE qs.quiz_id = q.id)
     ORDER BY q.id DESC
 ")->fetchAll();
+
+// IDs of the quizzes this user has added to favourites (empty list if not logged in)
+$favIds = [];
+if (isset($_SESSION['user_id'])) {
+    $s = $pdo->prepare('SELECT quiz_id FROM favourites WHERE user_id = ?');
+    $s->execute([$_SESSION['user_id']]);
+    $favIds = array_map('intval', $s->fetchAll(PDO::FETCH_COLUMN));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,9 +58,14 @@ $quizzes = $pdo->query("
 
         <?php if (isset($_SESSION['user_id'])): ?>
 
-            <span class="welcome">
-                Hi, <?= htmlspecialchars($_SESSION['username']) ?>
-            </span>
+            <a href="account.php" class="avatar"
+                title="<?= htmlspecialchars($_SESSION['username']) ?>"
+                aria-label="Account: <?= htmlspecialchars($_SESSION['username']) ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/>
+                    </svg>
+            </a>
 
             <a href="logout.php">
                 Logout
@@ -95,6 +109,8 @@ $quizzes = $pdo->query("
 
     <?php foreach ($quizzes as $q): ?>
 
+        <?php $isFav = in_array((int)$q['id'], $favIds, true); ?>
+
         <article class="section" data-type="<?= htmlspecialchars($q['type']) ?>">
 
             <div class="section_content">
@@ -115,6 +131,17 @@ $quizzes = $pdo->query("
                         QUIZZY!
 
                     </a>
+
+                    <div class="favourite">
+                        <button type="button"
+                                class="fav_btn <?= $isFav ? 'active' : '' ?>"
+                                data-quiz-id="<?= (int)$q['id'] ?>"
+                                aria-label="Add to favourites">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -137,6 +164,7 @@ $quizzes = $pdo->query("
 </div>
 
 <script>
+// Filter buttons: All / Official / Created
 document.querySelectorAll('.filter_btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var filter = btn.dataset.filter;
@@ -150,6 +178,29 @@ document.querySelectorAll('.filter_btn').forEach(function (btn) {
             card.style.display =
                 (filter === 'all' || card.dataset.type === filter) ? '' : 'none';
         });
+    });
+});
+
+// Favourite hearts
+document.querySelectorAll('.fav_btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+
+        var data = new FormData();
+        data.append('quiz_id', btn.dataset.quizId);
+
+        fetch('favourite.php', { method: 'POST', body: data })
+            .then(function (res) {
+                if (res.status === 401) {          // not logged in
+                    window.location.href = 'login.php';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(function (json) {
+                if (!json) return;
+                btn.classList.toggle('active', json.favourite);
+            })
+            .catch(function (err) { console.error(err); });
     });
 });
 </script>

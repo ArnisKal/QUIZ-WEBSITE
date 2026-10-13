@@ -24,7 +24,7 @@
 
            <div class="menu_list" id="menuList">
                 <a href="settings.php">Settings</a>
-                <a href="language.php">Language</a>
+                <a href="language.php"></a>
                 <a href="account.php">Account</a>
                 <a href="liked.php">Liked quizzes</a>
                 <a href="leaderboards.php">Leaderboard</a>
@@ -54,9 +54,14 @@
 
         <?php if (isset($_SESSION['user_id'])): ?>
 
-            <span>
-                Hi, <?= htmlspecialchars($_SESSION['username']) ?>
-            </span>
+            <a href="account.php" class="avatar"
+                title="<?= htmlspecialchars($_SESSION['username']) ?>"
+                aria-label="Account: <?= htmlspecialchars($_SESSION['username']) ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/>
+                    </svg>
+            </a>
 
             <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
                 <a href="admin/admin.php">Admin</a>

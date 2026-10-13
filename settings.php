@@ -30,7 +30,7 @@ if (empty($_SESSION['user_id'])) {
             <div class="set_body set_panel" id="tab-general">
 
                 <div class="set_row">
-                    <span class="set_label" id="modeLabel">Mode</span>
+                    <span class="set_label" id="modeLabel">Themes</span>
                     <div class="set_control">
                         <div class="set_options" role="radiogroup" aria-labelledby="modeLabel">
                             <label class="set_option">
@@ -70,31 +70,5 @@ if (empty($_SESSION['user_id'])) {
 
         </div>
     </main>
-
-    <script>
-        var tabs   = document.querySelectorAll('.set_tab');
-        var panels = document.querySelectorAll('.set_panel');
-
-        tabs.forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                tabs.forEach(function (t) { t.classList.remove('active'); });
-                tab.classList.add('active');
-
-                panels.forEach(function (p) {
-                    p.hidden = (p.id !== 'tab-' + tab.dataset.tab);
-                });
-            });
-        });
-        var music    = document.getElementById('music');
-        var musicOut = document.getElementById('musicOut');
-
-        function updateSlider() {
-            musicOut.textContent = music.value;
-            music.style.setProperty('--val', music.value + '%');
-        }
-
-        music.addEventListener('input', updateSlider);
-        updateSlider();
-    </script>
 </body>
 </html>
