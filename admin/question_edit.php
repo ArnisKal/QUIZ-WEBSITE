@@ -2,7 +2,7 @@
 require_once 'admin_check.php';
 
 const MIN_ANSWERS = 2;
-const MAX_ANSWERS = 8;  
+const MAX_ANSWERS = 8;
 
 $quizId = (int)($_GET['quiz_id'] ?? 0);
 $id     = (int)($_GET['id'] ?? 0);
@@ -16,8 +16,8 @@ if (!$quiz) {
 }
 
 $text    = '';
-$options = ['', '', '', '']; 
-$correct = 0;
+$options = ['', '', '', ''];
+$correct = '';
 
 if ($editing) {
     $stmt = $pdo->prepare('SELECT * FROM questions WHERE id = ? AND quiz_id = ?');
@@ -33,9 +33,9 @@ if ($editing) {
     $options = [];
     foreach ($stmt->fetchAll() as $a) {
         $options[(int)$a['id']] = $a['answer_text'];
-        if ($a['is_correct']) { $correct = (int)$a['id']; }
+        if ($a['is_correct']) { $correct = (string)$a['id']; }
     }
-    if (!$correct && $options) { $correct = array_key_first($options); }
+    if ($correct === '' && $options) { $correct = (string)array_key_first($options); }
 }
 
 $count = $pdo->prepare('SELECT COUNT(*) FROM questions WHERE quiz_id = ?');
@@ -49,28 +49,59 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $text    = trim($_POST['question_text'] ?? '');
     $posted  = is_array($_POST['answers'] ?? null) ? array_filter($_POST['answers'], 'is_string') : [];
-    $correct = (int)($_POST['correct'] ?? 0);
+    $correct = (string)($_POST['correct'] ?? '');
     $options = $posted;
 
     if ($text === '') {
         $error = 'Please enter the question text';
     } elseif ($editing) {
-        $hasEmpty = false;
-        foreach ($posted as $t) { if (trim($t) === '') { $hasEmpty = true; } }
+        $stmt = $pdo->prepare('SELECT id FROM answers WHERE question_id = ?');
+        $stmt->execute([$id]);
+        $existingIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 
-        if ($hasEmpty) {
-            $error = 'Answer options cannot be empty';
+        $hasEmpty = false;
+        $invalid  = false;
+        foreach ($posted as $key => $t) {
+            if (trim($t) === '') { $hasEmpty = true; }
+            $isExisting = ctype_digit((string)$key) && in_array((int)$key, $existingIds, true);
+            $isNew      = preg_match('/^new_[0-9]+$/', (string)$key) === 1;
+            if (!$isExisting && !$isNew) { $invalid = true; }
+        }
+
+        if ($invalid) {
+            $error = 'Invalid form data';
+        } elseif ($hasEmpty) {
+            $error = 'Answer options cannot be empty (fill them in or remove them)';
+        } elseif (count($posted) < MIN_ANSWERS) {
+            $error = 'At least ' . MIN_ANSWERS . ' answer options are required';
+        } elseif (count($posted) > MAX_ANSWERS) {
+            $error = 'No more than ' . MAX_ANSWERS . ' answer options';
         } elseif (!array_key_exists($correct, $posted)) {
             $error = 'Please select the correct answer';
         } else {
             $pdo->beginTransaction();
             try {
                 $pdo->prepare('UPDATE questions SET question_text = ? WHERE id = ?')->execute([$text, $id]);
+
                 $upd = $pdo->prepare('UPDATE answers SET answer_text = ?, is_correct = ? WHERE id = ? AND question_id = ?');
-                foreach ($posted as $answerId => $answerText) {
-                    $answerId = (int)$answerId;
-                    $upd->execute([trim($answerText), $answerId === $correct ? 1 : 0, $answerId, $id]);
+                $ins = $pdo->prepare('INSERT INTO answers (question_id, answer_text, is_correct) VALUES (?, ?, ?)');
+                $keep = [];
+
+                foreach ($posted as $key => $answerText) {
+                    $isCorrect = ((string)$key === $correct) ? 1 : 0;
+                    if (ctype_digit((string)$key)) {
+                        $upd->execute([trim($answerText), $isCorrect, (int)$key, $id]);
+                        $keep[] = (int)$key;
+                    } else {
+                        $ins->execute([$id, trim($answerText), $isCorrect]);
+                    }
                 }
+
+                $del = $pdo->prepare('DELETE FROM answers WHERE id = ? AND question_id = ?');
+                foreach (array_diff($existingIds, $keep) as $removedId) {
+                    $del->execute([$removedId, $id]);
+                }
+
                 $pdo->commit();
             } catch (Throwable $e) {
                 $pdo->rollBack();
@@ -102,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $ins = $pdo->prepare('INSERT INTO answers (question_id, answer_text, is_correct) VALUES (?, ?, ?)');
                 foreach ($filled as $i => $answerText) {
-                    $ins->execute([$questionId, trim($answerText), (int)$i === $correct ? 1 : 0]);
+                    $ins->execute([$questionId, trim($answerText), (string)$i === $correct ? 1 : 0]);
                 }
                 $pdo->commit();
             } catch (Throwable $e) {
@@ -157,26 +188,22 @@ if (!$editing) {
         </div>
 
         <div class="field">
-            <label>Answer options <span class="field_hint">(select the correct one<?= $editing ? '' : ', ' . MIN_ANSWERS . '–' . MAX_ANSWERS . ' options' ?>)</span></label>
+            <label>Answer options <span class="field_hint">(select the correct one, <?= MIN_ANSWERS ?>–<?= MAX_ANSWERS ?> options)</span></label>
             <div class="answers_list" id="answersList">
-                <?php foreach ($options as $key => $optText): ?>
+                <?php $n = 0; foreach ($options as $key => $optText): $n++; ?>
                     <div class="answer_row">
-                        <input type="radio" name="correct" value="<?= (int)$key ?>"
-                               <?= (int)$key === $correct ? 'checked' : '' ?> aria-label="Correct answer">
-                        <input type="text" name="answers[<?= (int)$key ?>]"
+                        <input type="radio" name="correct" value="<?= htmlspecialchars((string)$key) ?>"
+                               <?= (string)$key === $correct ? 'checked' : '' ?> aria-label="Correct answer">
+                        <input type="text" name="answers[<?= htmlspecialchars((string)$key) ?>]"
                                value="<?= htmlspecialchars($optText) ?>"
-                               placeholder="Option <?= (int)array_search($key, array_keys($options)) + 1 ?>"
+                               placeholder="Option <?= $n ?>"
                                <?= $editing ? 'required' : '' ?>>
-                        <?php if (!$editing): ?>
-                            <button type="button" class="btn btn_danger remove_btn" aria-label="Remove option">✕</button>
-                        <?php endif; ?>
+                        <button type="button" class="btn btn_danger remove_btn" aria-label="Remove option">✕</button>
                     </div>
                 <?php endforeach; ?>
             </div>
 
-            <?php if (!$editing): ?>
-                <button type="button" class="btn" id="addBtn" style="margin-top:.6rem">+ Add answer</button>
-            <?php endif; ?>
+            <button type="button" class="btn" id="addBtn" style="margin-top:.6rem">+ Add answer</button>
         </div>
 
         <div class="form_actions">
@@ -191,16 +218,13 @@ if (!$editing) {
 
 </div>
 
-<?php if (!$editing): ?>
 <script>
 var MIN = <?= MIN_ANSWERS ?>;
 var MAX = <?= MAX_ANSWERS ?>;
+var EDITING = <?= $editing ? 'true' : 'false' ?>;
 var list   = document.getElementById('answersList');
 var addBtn = document.getElementById('addBtn');
-var nextKey = 0;
-list.querySelectorAll('input[type="radio"]').forEach(function (r) {
-    nextKey = Math.max(nextKey, parseInt(r.value, 10) + 1);
-});
+var newCounter = 0;
 
 function refresh() {
     var rows = list.querySelectorAll('.answer_row');
@@ -220,13 +244,13 @@ function refresh() {
 addBtn.addEventListener('click', function () {
     if (list.querySelectorAll('.answer_row').length >= MAX) return;
 
+    var key = 'new_' + Date.now() + (newCounter++);
     var row = document.createElement('div');
     row.className = 'answer_row';
     row.innerHTML =
-        '<input type="radio" name="correct" value="' + nextKey + '" aria-label="Correct answer">' +
-        '<input type="text" name="answers[' + nextKey + ']">' +
+        '<input type="radio" name="correct" value="' + key + '" aria-label="Correct answer">' +
+        '<input type="text" name="answers[' + key + ']"' + (EDITING ? ' required' : '') + '>' +
         '<button type="button" class="btn btn_danger remove_btn" aria-label="Remove option">✕</button>';
-    nextKey++;
 
     list.appendChild(row);
     refresh();
@@ -242,7 +266,6 @@ list.addEventListener('click', function (e) {
 
 refresh();
 </script>
-<?php endif; ?>
 
 </body>
 </html>

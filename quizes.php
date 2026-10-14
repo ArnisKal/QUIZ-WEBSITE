@@ -7,7 +7,7 @@ if (($_SESSION['role'] ?? '') === 'admin') {
 require_once 'site_check.php';
 require_once 'database.php';
 
-// Only quizzes that already have at least one question are shown to players
+
 $quizzes = $pdo->query("
     SELECT q.*
     FROM quizzes q
@@ -15,7 +15,6 @@ $quizzes = $pdo->query("
     ORDER BY q.id DESC
 ")->fetchAll();
 
-// IDs of the quizzes this user has added to favourites (empty list if not logged in)
 $favIds = [];
 if (isset($_SESSION['user_id'])) {
     $s = $pdo->prepare('SELECT quiz_id FROM favourites WHERE user_id = ?');
@@ -164,7 +163,6 @@ if (isset($_SESSION['user_id'])) {
 </div>
 
 <script>
-// Filter buttons: All / Official / Created
 document.querySelectorAll('.filter_btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var filter = btn.dataset.filter;
@@ -181,7 +179,6 @@ document.querySelectorAll('.filter_btn').forEach(function (btn) {
     });
 });
 
-// Favourite hearts
 document.querySelectorAll('.fav_btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
 
@@ -190,7 +187,7 @@ document.querySelectorAll('.fav_btn').forEach(function (btn) {
 
         fetch('favourite.php', { method: 'POST', body: data })
             .then(function (res) {
-                if (res.status === 401) {          // not logged in
+                if (res.status === 401) {       
                     window.location.href = 'login.php';
                     return null;
                 }
