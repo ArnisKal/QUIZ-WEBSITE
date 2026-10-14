@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/admin_check.php';
 
+$message = $_SESSION['flash'] ?? '';
+unset($_SESSION['flash']);
+
 $quizzes = $pdo->query('
     SELECT q.id, q.title, q.type, COUNT(qs.id) AS questions_count
     FROM quizzes q
@@ -40,6 +43,8 @@ $quizzes = $pdo->query('
         <a href="../quiz_create.php" class="btn btn_dark">+ Create quiz</a>
     </div>
 
+    <?php if ($message): ?><p class="flash_ok"><?= htmlspecialchars($message) ?></p><?php endif; ?>
+
     <div class="admin_card">
         <?php if (!$quizzes): ?>
 
@@ -75,7 +80,11 @@ $quizzes = $pdo->query('
                             <td class="col_actions">
                                 <div class="admin_actions">
                                     <a class="btn" href="quiz_edit.php?id=<?= (int)$q['id'] ?>">Edit</a>
-                                    <a class="btn btn_danger" href="quiz_delete.php?id=<?= (int)$q['id'] ?>">Delete</a>
+                                    <form method="post" action="quiz_delete.php" style="display:inline;margin:0"
+                                          onsubmit="return confirm('Delete this quiz?');">
+                                        <input type="hidden" name="id" value="<?= (int)$q['id'] ?>">
+                                        <button type="submit" class="btn btn_danger">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
