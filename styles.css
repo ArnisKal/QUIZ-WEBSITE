@@ -207,6 +207,7 @@ main {
 
 .menu_btn:hover {
     background: var(--bg-hover);
+    border-radius: 50%;
 }
 
 .menu_list {

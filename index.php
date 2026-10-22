@@ -66,9 +66,7 @@
                 <a href="admin/admin.php">Admin</a>
             <?php endif; ?>
 
-            <a href="logout.php">Logout
-                <img src="images/logout.png">
-            </a>
+            <a href="logout.php">Logout</a>
 
         <?php else: ?>
 
