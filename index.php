@@ -24,7 +24,6 @@
 
            <div class="menu_list" id="menuList">
                 <a href="settings.php">Settings</a>
-                <a href="language.php"></a>
                 <a href="account.php">Account</a>
                 <a href="liked.php">Liked quizzes</a>
                 <a href="leaderboards.php">Leaderboard</a>
@@ -169,6 +168,7 @@
     </nav>
     <p class="footer_copy">© 2026 QUIZZITY. All rights reserved.</p>
 </footer>
+
 
 </body>
 </html>

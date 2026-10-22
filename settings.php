@@ -39,7 +39,7 @@ if (empty($_SESSION['user_id'])) {
                             </label>
                             <label class="set_option">
                                 <input type="radio" name="mode" value="midnight">
-                                <span>Midnight</span>
+                                <span>Dark</span>
                             </label>
                         </div>
                         <small class="set_note">More modes are coming soon.</small>

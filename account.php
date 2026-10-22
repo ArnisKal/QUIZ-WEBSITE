@@ -28,7 +28,7 @@ if (!isset($tabs[$tab])) {
 $stmt = $pdo->prepare('SELECT id, username, email, password_hash, role, country FROM users WHERE id = ?');
 $stmt->execute([$userId]);
 $user = $stmt->fetch();
-if (!$user) {                    
+if (!$user) {
     session_destroy();
     header('Location: login.php');
     exit;
@@ -43,8 +43,10 @@ $message = $_SESSION['flash'] ?? '';
 unset($_SESSION['flash']);
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+$isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
+$action = $isPost ? ($_POST['action'] ?? '') : '';
+
+if ($isPost) {
 
     if (!hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
         $error = 'Session expired. Please try again.';
@@ -136,7 +138,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account - Quizzity</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'midnight') {
+                document.documentElement.dataset.theme = 'midnight';
+            }
+        } catch (e) {}
+    </script>
 </head>
 <body>
 
@@ -149,28 +163,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </nav>
 </header>
 
-<div class="acc_page">
+<main class="acc_page">
 
     <nav class="acc_nav" aria-label="Account sections">
-        <?php foreach ($tabs as $key => $label): ?>
-            <a href="account.php?tab=<?= $key ?>"
-               class="<?= $key === $tab ? 'active' : '' ?> <?= $key === 'delete' ? 'danger' : '' ?>"
-               <?= $key === $tab ? 'aria-current="page"' : '' ?>><?= $label ?></a>
+        <?php foreach ($tabs as $key => $label):
+            $classes = array_filter([
+                $key === $tab ? 'active' : '',
+                $key === 'delete' ? 'danger' : '',
+            ]);
+        ?>
+            <a href="account.php?tab=<?= $key ?>"<?= $classes ? ' class="' . implode(' ', $classes) . '"' : '' ?><?= $key === $tab ? ' aria-current="page"' : '' ?>><?= $label ?></a>
         <?php endforeach; ?>
     </nav>
 
     <section class="acc_panel">
         <h1><?= $tabs[$tab] ?></h1>
 
-        <?php if ($message): ?><p class="acc_msg ok"><?= htmlspecialchars($message) ?></p><?php endif; ?>
-        <?php if ($error): ?><p class="acc_msg err"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+        <?php if ($message): ?>
+            <p class="flash_ok" role="status"><?= htmlspecialchars($message) ?></p>
+        <?php endif; ?>
+        <?php if ($error): ?>
+            <p class="form_error" role="alert"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
         <?php if ($tab === 'profile'): ?>
 
-            <?php $act = $_POST['action'] ?? ''; ?>
             <div class="pi">
 
-                <details class="pi_row" <?= $error && $act === 'update_username' ? 'open' : '' ?>>
+                <details class="pi_row" <?= $error && $action === 'update_username' ? 'open' : '' ?>>
                     <summary>
                         <div>
                             <span class="pi_label">Nickname</span>
@@ -183,8 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="hidden" name="action" value="update_username">
                         <div class="field">
                             <label for="username">New nickname</label>
-                            <input id="username" name="username" maxlength="30" required
-                                   value="<?= htmlspecialchars($act === 'update_username' ? ($_POST['username'] ?? '') : $user['username']) ?>">
+                            <input id="username" name="username" maxlength="30" required autocomplete="nickname"
+                                   value="<?= htmlspecialchars($action === 'update_username' ? ($_POST['username'] ?? '') : $user['username']) ?>">
                             <span class="field_hint">3-30 characters: letters, numbers and _</span>
                         </div>
                         <div class="form_actions">
@@ -193,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </form>
                 </details>
 
-                <details class="pi_row" <?= $error && $act === 'update_country' ? 'open' : '' ?>>
+                <details class="pi_row" <?= $error && $action === 'update_country' ? 'open' : '' ?>>
                     <summary>
                         <div>
                             <span class="pi_label">Country</span>
@@ -213,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="field">
                             <label for="country">Select your country</label>
                             <select id="country" name="country">
-                                <option value="">- Not selected -</option>
+                                <option value="">Not selected</option>
                                 <?php foreach (countries() as $code => $name): ?>
                                     <option value="<?= $code ?>" <?= $user['country'] === $code ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($name) ?>
@@ -236,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="action" value="update_email">
                 <div class="field">
                     <label for="email">Email</label>
-                    <input id="email" type="email" name="email" maxlength="255" required
+                    <input id="email" type="email" name="email" maxlength="255" required autocomplete="email"
                            value="<?= htmlspecialchars($_POST['email'] ?? $user['email']) ?>">
                 </div>
                 <div class="field">
@@ -260,6 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field">
                     <label for="new_password">New password</label>
                     <input id="new_password" type="password" name="new_password" minlength="8" required autocomplete="new-password">
+                    <span class="field_hint">At least 8 characters</span>
                 </div>
                 <div class="field">
                     <label for="confirm_password">Repeat new password</label>
@@ -289,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
     </section>
 
-</div>
+</main>
 
 </body>
 </html>

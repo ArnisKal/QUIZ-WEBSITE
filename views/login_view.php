@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quizzity</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -17,6 +20,23 @@
             <?php if (!empty($error)): ?>
                 <p class="form_error" role="alert"><?= htmlspecialchars($error) ?></p>
             <?php endif; ?>
+
+            <div class="oauth">
+                <button>
+                    <img src="images/google.png" width="20px">
+                    SIGN IN WITH GOOGLE
+                </button>
+
+                <button>
+                    <img src="images/twitter.png" width="20px">
+                    SIGN IN WITH X
+                </button>
+
+                <button>
+                    <img src="images/discord.png" width="20px">
+                    SIGN IN WITH DISCORD
+                </button>
+            </div>
 
             <div class="field">
                 <label for="email">Email</label>
