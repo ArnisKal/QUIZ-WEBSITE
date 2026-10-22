@@ -1,46 +1,27 @@
 <?php
 session_start();
-
+if (($_SESSION['role'] ?? '') === 'admin') {
+    header('Location: admin/admin.php');
+    exit;
+}
 require_once 'site_check.php';
 require_once 'database.php';
 
-$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
-$sql = "
+$quizzes = $pdo->query("
     SELECT q.*
     FROM quizzes q
-    WHERE EXISTS (
-        SELECT 1
-        FROM questions qs
-        WHERE qs.quiz_id = q.id
-    )
-";
-
-if (!$isAdmin) {
-    $sql .= " AND q.status = 'public'";
-}
-
-$sql .= " ORDER BY q.id DESC";
-
-$quizzes = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    WHERE EXISTS (SELECT 1 FROM questions qs WHERE qs.quiz_id = q.id)
+    ORDER BY q.id DESC
+")->fetchAll();
 
 $favIds = [];
-
 if (isset($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare(
-        'SELECT quiz_id FROM favourites WHERE user_id = ?'
-    );
-
-    $stmt->execute([$_SESSION['user_id']]);
-
-    $favIds = array_map(
-        'intval',
-        $stmt->fetchAll(PDO::FETCH_COLUMN)
-    );
+    $s = $pdo->prepare('SELECT quiz_id FROM favourites WHERE user_id = ?');
+    $s->execute([$_SESSION['user_id']]);
+    $favIds = array_map('intval', $s->fetchAll(PDO::FETCH_COLUMN));
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
