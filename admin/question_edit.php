@@ -3,6 +3,10 @@ require_once 'admin_check.php';
 
 const MIN_ANSWERS = 2;
 const MAX_ANSWERS = 8;
+const MIN_TIME    = 10;
+const MAX_TIME    = 180;
+const IMAGES_DIR  = __DIR__ . '/../images';
+const IMAGES_URL  = '../images';
 
 $quizId = (int)($_GET['quiz_id'] ?? 0);
 $id     = (int)($_GET['id'] ?? 0);
@@ -12,21 +16,37 @@ $stmt = $pdo->prepare('SELECT id, title FROM quizzes WHERE id = ?');
 $stmt->execute([$quizId]);
 $quiz = $stmt->fetch();
 if (!$quiz) {
+    http_response_code(404);
     exit('Quiz Not Found!');
 }
+$images = [];
+if (is_dir(IMAGES_DIR)) {
+    foreach (scandir(IMAGES_DIR) as $f) {
+        $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+            $images[] = $f;
+        }
+    }
+    sort($images);
+}
 
-$text    = '';
-$options = ['', '', '', ''];
-$correct = '';
+$text      = '';
+$image     = '';
+$timeLimit = 30;
+$options   = ['', '', '', ''];
+$correct   = '';
 
 if ($editing) {
     $stmt = $pdo->prepare('SELECT * FROM questions WHERE id = ? AND quiz_id = ?');
     $stmt->execute([$id, $quizId]);
     $question = $stmt->fetch();
     if (!$question) {
+        http_response_code(404);
         exit('Question not found');
     }
-    $text = $question['question_text'];
+    $text      = $question['question_text'];
+    $image     = (string)($question['image'] ?? '');
+    $timeLimit = (int)$question['time_limit'];
 
     $stmt = $pdo->prepare('SELECT id, answer_text, is_correct FROM answers WHERE question_id = ? ORDER BY id');
     $stmt->execute([$id]);
@@ -47,13 +67,19 @@ unset($_SESSION['flash']);
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $text    = trim($_POST['question_text'] ?? '');
-    $posted  = is_array($_POST['answers'] ?? null) ? array_filter($_POST['answers'], 'is_string') : [];
-    $correct = (string)($_POST['correct'] ?? '');
-    $options = $posted;
+    $text      = trim($_POST['question_text'] ?? '');
+    $image     = (string)($_POST['image'] ?? '');
+    $timeLimit = (int)($_POST['time_limit'] ?? 0);
+    $posted    = is_array($_POST['answers'] ?? null) ? array_filter($_POST['answers'], 'is_string') : [];
+    $correct   = (string)($_POST['correct'] ?? '');
+    $options   = $posted;
 
     if ($text === '') {
         $error = 'Please enter the question text';
+    } elseif ($timeLimit < MIN_TIME || $timeLimit > MAX_TIME) {
+        $error = 'Timer must be between ' . MIN_TIME . ' and ' . MAX_TIME . ' seconds';
+    } elseif ($image !== '' && !in_array($image, $images, true)) {
+        $error = 'Invalid image';
     } elseif ($editing) {
         $stmt = $pdo->prepare('SELECT id FROM answers WHERE question_id = ?');
         $stmt->execute([$id]);
@@ -81,7 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $pdo->beginTransaction();
             try {
-                $pdo->prepare('UPDATE questions SET question_text = ? WHERE id = ?')->execute([$text, $id]);
+                $pdo->prepare('UPDATE questions SET question_text = ?, image = ?, time_limit = ? WHERE id = ?')
+                    ->execute([$text, $image !== '' ? $image : null, $timeLimit, $id]);
 
                 $upd = $pdo->prepare('UPDATE answers SET answer_text = ?, is_correct = ? WHERE id = ? AND question_id = ?');
                 $ins = $pdo->prepare('INSERT INTO answers (question_id, answer_text, is_correct) VALUES (?, ?, ?)');
@@ -127,8 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $next->execute([$quizId]);
                 $number = (int)$next->fetchColumn();
 
-                $pdo->prepare('INSERT INTO questions (quiz_id, question_text, question_number) VALUES (?, ?, ?)')
-                    ->execute([$quizId, $text, $number]);
+                $pdo->prepare('INSERT INTO questions (quiz_id, question_text, question_number, image, time_limit) VALUES (?, ?, ?, ?, ?)')
+                    ->execute([$quizId, $text, $number, $image !== '' ? $image : null, $timeLimit]);
                 $questionId = $pdo->lastInsertId();
 
                 $ins = $pdo->prepare('INSERT INTO answers (question_id, answer_text, is_correct) VALUES (?, ?, ?)');
@@ -166,6 +193,11 @@ if (!$editing) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $editing ? 'Edit question' : 'Add question' ?> - <?= htmlspecialchars($quiz['title']) ?></title>
     <link rel="stylesheet" href="../styles.css">
+    <script>
+    try {
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+    </script>
 </head>
 <body>
 <div class="admin_main">
@@ -185,6 +217,26 @@ if (!$editing) {
         <div class="field">
             <label for="question_text">Question</label>
             <input id="question_text" name="question_text" value="<?= htmlspecialchars($text) ?>" required autofocus>
+        </div>
+
+        <div class="field">
+            <label for="time_limit">Timer <span class="field_hint">(seconds, <?= MIN_TIME ?>–<?= MAX_TIME ?>)</span></label>
+            <input id="time_limit" name="time_limit" type="number"
+                   min="<?= MIN_TIME ?>" max="<?= MAX_TIME ?>" step="1"
+                   value="<?= (int)$timeLimit ?>" required>
+        </div>
+
+        <div class="field">
+            <label for="image">Image <span class="field_hint">(optional)</span></label>
+            <select id="image" name="image">
+                <option value="">— No image —</option>
+                <?php foreach ($images as $img): ?>
+                    <option value="<?= htmlspecialchars($img) ?>" <?= $img === $image ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($img) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <img id="imagePreview" alt="" style="display:none; max-width:240px; margin-top:.6rem; border-radius:6px">
         </div>
 
         <div class="field">
@@ -263,9 +315,24 @@ list.addEventListener('click', function (e) {
     e.target.closest('.answer_row').remove();
     refresh();
 });
+var IMAGES_URL = '<?= IMAGES_URL ?>/';
+var imageSelect  = document.getElementById('image');
+var imagePreview = document.getElementById('imagePreview');
+
+function updatePreview() {
+    if (imageSelect.value) {
+        imagePreview.src = IMAGES_URL + encodeURIComponent(imageSelect.value);
+        imagePreview.style.display = 'block';
+    } else {
+        imagePreview.style.display = 'none';
+    }
+}
+imageSelect.addEventListener('change', updatePreview);
+updatePreview();
 
 refresh();
 </script>
 
+<script src="../toast.js"></script>
 </body>
 </html>

@@ -7,7 +7,6 @@ if (($_SESSION['role'] ?? '') === 'admin') {
 require_once 'site_check.php';
 require_once 'database.php';
 
-
 $quizzes = $pdo->query("
     SELECT q.*
     FROM quizzes q
@@ -28,8 +27,13 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quizzes</title>
-
     <link rel="stylesheet" href="styles.css">
+    <script>
+    try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+    </script>
 </head>
 <body>
 
@@ -76,7 +80,7 @@ if (isset($_SESSION['user_id'])) {
                 Login
             </a>
 
-            <a href="register.php" class="nav_cta">
+            <a href="register.php" class="nav-cta">
                 Sign up
             </a>
 
@@ -108,11 +112,18 @@ if (isset($_SESSION['user_id'])) {
 
     <?php foreach ($quizzes as $q): ?>
 
-        <?php $isFav = in_array((int)$q['id'], $favIds, true); ?>
+        <?php
+        $isFav    = in_array((int)$q['id'], $favIds, true);
+        $isPublic = ($q['status'] ?? 'public') === 'public';
+        ?>
 
-        <article class="section" data-type="<?= htmlspecialchars($q['type']) ?>">
+        <article class="section <?= $isPublic ? '' : 'section_dev' ?>" data-type="<?= htmlspecialchars($q['type']) ?>">
 
             <div class="section_content">
+
+                <span class="status <?= $isPublic ? 'status_public' : 'status_dev' ?>">
+                    <?= $isPublic ? 'Public' : 'In development' ?>
+                </span>
 
                 <h2>
                     <?= htmlspecialchars($q['title']) ?>
@@ -123,13 +134,11 @@ if (isset($_SESSION['user_id'])) {
                 </p>
 
                 <div class="section_actions">
-                    <a
-                        href="quiz.php?id=<?= (int)$q['id'] ?>"
-                        class="section_play_btn">
-
-                        QUIZZY!
-
-                    </a>
+                    <?php if ($isPublic): ?>
+                        <a href="quiz.php?id=<?= (int)$q['id'] ?>" class="section_play_btn">QUIZZY!</a>
+                    <?php else: ?>
+                        <span class="section_play_btn is_disabled" aria-disabled="true">Unavailable</span>
+                    <?php endif; ?>
 
                     <div class="favourite">
                         <button type="button"
@@ -187,7 +196,7 @@ document.querySelectorAll('.fav_btn').forEach(function (btn) {
 
         fetch('favourite.php', { method: 'POST', body: data })
             .then(function (res) {
-                if (res.status === 401) {       
+                if (res.status === 401) {
                     window.location.href = 'login.php';
                     return null;
                 }

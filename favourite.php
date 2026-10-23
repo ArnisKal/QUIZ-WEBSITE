@@ -4,7 +4,6 @@ require_once 'database.php';
 header('Content-Type: application/json');
 
 try {
-    // make PHP report database errors instead of hiding them
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if (empty($_SESSION['user_id'])) {
@@ -26,7 +25,6 @@ try {
     if ($del->rowCount() > 0) {
         $isFavourite = false;
     } else {
-        // no IGNORE here: if something is wrong, we want to see the error
         $pdo->prepare('INSERT INTO favourites (user_id, quiz_id) VALUES (?, ?)')
             ->execute([$userId, $quizId]);
         $isFavourite = true;

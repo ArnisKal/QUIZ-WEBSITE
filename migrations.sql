@@ -47,3 +47,7 @@ CREATE TABLE IF NOT EXISTS favourites (
 );
 
 ALTER TABLE users ADD COLUMN country CHAR(2) NULL;
+
+ALTER TABLE questions ADD COLUMN image VARCHAR(255) NULL;
+ALTER TABLE questions ADD COLUMN time_limit SMALLINT UNSIGNED NOT NULL DEFAULT 30;
+ALTER TABLE quizzes   ADD COLUMN status ENUM('public', 'development') NOT NULL DEFAULT 'public';

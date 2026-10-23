@@ -4,8 +4,6 @@ require_once __DIR__ . '/site_check.php';
 require_once __DIR__ . '/database.php';
 
 $id = (int)($_GET['id'] ?? 0);
-
-// Quiz
 $stmt = $pdo->prepare("SELECT * FROM quizzes WHERE id = ?");
 $stmt->execute([$id]);
 $quiz = $stmt->fetch();
@@ -14,8 +12,11 @@ if (!$quiz) {
     http_response_code(404);
     exit('Quiz not found');
 }
-
-// Questions
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+if (($quiz['status'] ?? 'public') !== 'public' && !$isAdmin) {
+    header('Location: index.php');
+    exit;
+}
 $stmt = $pdo->prepare("SELECT * FROM questions WHERE quiz_id = ? ORDER BY question_number, id");
 $stmt->execute([$id]);
 $questions = $stmt->fetchAll();
@@ -34,6 +35,8 @@ foreach ($questions as $q) {
     $quizData[] = [
         'id'      => (int)$q['id'],
         'text'    => $q['question_text'],
+        'image'   => $q['image'] ?? '',
+        'time'    => (int)$q['time_limit'],
         'answers' => $answers,
     ];
 }
@@ -45,6 +48,11 @@ foreach ($questions as $q) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($quiz['title']) ?> - Quizzity</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+    try {
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+    </script>
 </head>
 <body>
 
@@ -73,10 +81,13 @@ foreach ($questions as $q) {
         <div class="play_top">
             <h1 class="play_title"><?= htmlspecialchars($quiz['title']) ?></h1>
             <span class="play_counter" id="counter"></span>
+            <span class="play_counter" id="timerText"></span>
         </div>
         <div class="play_progress"><div class="play_bar" id="bar"></div></div>
+        <div class="play_timer"><div class="play_timer_bar" id="timerBar"></div></div>
 
         <div class="play_question" id="questionText"></div>
+        <img class="play_image" id="questionImage" alt="" hidden>
         <div class="play_answers" id="answers"></div>
 
         <div class="play_footer">
@@ -100,21 +111,28 @@ foreach ($questions as $q) {
 <?php if ($quizData): ?>
 <script>
 var QUESTIONS = <?= json_encode($quizData, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+var IMAGES_URL = 'images/';
 
 var current = 0;
 var score = 0;
 var locked = false;
+var chosen = null;
+var timerId = null;
 
-var elQuestion = document.getElementById('questionText');
-var elAnswers  = document.getElementById('answers');
-var elFeedback = document.getElementById('feedback');
-var elNext     = document.getElementById('nextBtn');
-var elCounter  = document.getElementById('counter');
-var elBar      = document.getElementById('bar');
+var elQuestion  = document.getElementById('questionText');
+var elImage     = document.getElementById('questionImage');
+var elAnswers   = document.getElementById('answers');
+var elFeedback  = document.getElementById('feedback');
+var elNext      = document.getElementById('nextBtn');
+var elCounter   = document.getElementById('counter');
+var elBar       = document.getElementById('bar');
+var elTimerBar  = document.getElementById('timerBar');
+var elTimerText = document.getElementById('timerText');
 
 function showQuestion() {
     var q = QUESTIONS[current];
     locked = false;
+    chosen = null;
 
     elQuestion.textContent = q.text;
     elFeedback.textContent = '';
@@ -124,7 +142,15 @@ function showQuestion() {
     elCounter.textContent = (current + 1) + ' / ' + QUESTIONS.length;
     elBar.style.width = ((current + 1) / QUESTIONS.length * 100) + '%';
 
-    q.answers.forEach(function (a, i) {
+    if (q.image) {
+        elImage.src = IMAGES_URL + encodeURIComponent(q.image);
+        elImage.hidden = false;
+    } else {
+        elImage.hidden = true;
+        elImage.removeAttribute('src');
+    }
+
+    q.answers.forEach(function (a) {
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'play_btn';
@@ -134,12 +160,42 @@ function showQuestion() {
         text.textContent = a.text;
 
         btn.appendChild(text);
-        btn.addEventListener('click', function () { choose(btn, a); });
+        btn.addEventListener('click', function () { pick(btn, a); });
         elAnswers.appendChild(btn);
     });
+
+    startTimer(q.time);
+}
+function pick(btn, answer) {
+    if (locked) return;
+    chosen = { btn: btn, answer: answer };
+    elAnswers.querySelectorAll('.play_btn').forEach(function (b) {
+        b.classList.remove('picked');
+    });
+    btn.classList.add('picked');
 }
 
-function choose(btn, answer) {
+function startTimer(seconds) {
+    clearInterval(timerId);
+    var end = Date.now() + seconds * 1000;
+    elTimerBar.style.transition = 'none';
+    elTimerBar.style.width = '100%';
+    void elTimerBar.offsetWidth;
+    elTimerBar.style.transition = 'width ' + seconds + 's linear';
+    elTimerBar.style.width = '0%';
+
+    function tick() {
+        var left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+        elTimerText.textContent = left + ' s';
+        if (left <= 0) {
+            clearInterval(timerId);
+            reveal();
+        }
+    }
+    tick();
+    timerId = setInterval(tick, 200);
+}
+function reveal() {
     if (locked) return;
     locked = true;
 
@@ -148,30 +204,31 @@ function choose(btn, answer) {
 
     q.answers.forEach(function (a, i) {
         buttons[i].disabled = true;
+        buttons[i].classList.remove('picked');
         if (a.correct) {
             buttons[i].classList.add('right');
-        } else if (buttons[i] === btn) {
+        } else if (chosen && buttons[i] === chosen.btn) {
             buttons[i].classList.add('wrong');
         } else {
             buttons[i].classList.add('dim');
         }
     });
 
-    if (answer.correct) {
+    if (chosen && chosen.answer.correct) {
         score++;
         elFeedback.textContent = 'Correct!';
         elFeedback.classList.add('ok');
     } else {
-        elFeedback.textContent = 'Wrong answer';
+        elFeedback.textContent = chosen ? 'Wrong answer' : "Time's up";
         elFeedback.classList.add('bad');
     }
 
     elNext.textContent = (current === QUESTIONS.length - 1) ? 'See result' : 'Next';
     elNext.style.display = 'inline-block';
-    elNext.focus();
 }
 
 elNext.addEventListener('click', function () {
+    clearInterval(timerId);
     current++;
     if (current < QUESTIONS.length) {
         showQuestion();

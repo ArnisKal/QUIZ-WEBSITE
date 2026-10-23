@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        } catch (e) {}
+    </script>
 </head>
 <body>
 
@@ -15,7 +20,7 @@
         <form class="auth-card" method="POST" action="login.php">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
             <h1>Welcome back</h1>
-            <p class="auth-sub">Log in to keep playing on QUIZZITY.</p>
+            <p class="auth-sub">Login with your best account.</p>
 
             <?php if (!empty($error)): ?>
                 <p class="form_error" role="alert"><?= htmlspecialchars($error) ?></p>

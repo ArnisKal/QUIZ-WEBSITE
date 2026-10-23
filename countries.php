@@ -1,5 +1,4 @@
 <?php
-// Returns [ 'LV' => 'Latvia', ... ] sorted by country name
 function countries(): array
 {
     static $list = null;
@@ -7,7 +6,7 @@ function countries(): array
         return $list;
     }
 
-    $raw = <<<'LIST'
+$raw = <<<'LIST'
 AF Afghanistan
 AL Albania
 DZ Algeria
@@ -213,13 +212,11 @@ LIST;
     $list = [];
     foreach (explode("\n", trim($raw)) as $line) {
         $line = trim($line);
-        $list[substr($line, 0, 2)] = substr($line, 3);   // "LV Latvia" -> LV => Latvia
+        $list[substr($line, 0, 2)] = substr($line, 3);   
     }
     asort($list);
     return $list;
 }
-
-// Small flag picture (images come from flagcdn.com, so no files to download)
 function flag_html(?string $code): string
 {
     if ($code === null || !isset(countries()[$code])) {

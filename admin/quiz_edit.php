@@ -6,6 +6,7 @@ $id = (int)($_GET['id'] ?? 0);
 $stmt = $pdo->prepare('SELECT id FROM quizzes WHERE id = ?');
 $stmt->execute([$id]);
 if (!$stmt->fetch()) {
+    http_response_code(404);
     exit('Quiz Not Found!');
 }
 
@@ -22,7 +23,7 @@ function renumberQuestions(PDO $pdo, int $quizId): void {
 $message = $_SESSION['flash'] ?? '';
 unset($_SESSION['flash']);
 $error = '';
-$posted = null;  
+$posted = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -32,6 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image = trim($_POST['image'] ?? '');
         $type  = ($_POST['type'] ?? '') === 'created' ? 'created' : 'official';
         $description = trim($_POST['description'] ?? '');
+        $status = $_POST['status'] ?? 'public';
+        if (!in_array($status, ['public', 'development'], true)) {
+            $status = 'development';
+        }
 
         $cnt = $pdo->prepare('SELECT COUNT(*) FROM questions WHERE quiz_id = ?');
         $cnt->execute([$id]);
@@ -41,16 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Title cannot be empty';
         } elseif (mb_strlen($title) > 100) {
             $error = 'Title must be 100 characters or less';
-        } elseif ($questionCount === 0) {
-            $error = 'Add at least one question before saving the quiz';
+        } elseif ($questionCount === 0 && $status === 'public') {
+            $error = 'Add at least one question before publishing the quiz';
         } else {
-            $pdo->prepare("UPDATE quizzes SET title = ?, description = ?, image = ?, type = ? WHERE id = ?")
-                ->execute([$title, $description, $image !== '' ? $image : null, $type, $id]);
+            $pdo->prepare("UPDATE quizzes SET title = ?, description = ?, image = ?, type = ?, status = ? WHERE id = ?")
+                ->execute([$title, $description, $image !== '' ? $image : null, $type, $status, $id]);
             $_SESSION['flash'] = 'Quiz saved';
             header("Location: quiz_edit.php?id=$id");
             exit;
         }
-        $posted = ['title' => $title, 'description' => $description, 'image' => $image, 'type' => $type];
+        $posted = [
+            'title' => $title, 'description' => $description,
+            'image' => $image, 'type' => $type, 'status' => $status,
+        ];
     }
 
     if ($action === 'delete_question') {
@@ -71,6 +79,9 @@ if ($posted) {
     $quiz = array_merge($quiz, $posted);
 }
 
+$status   = $quiz['status'] ?? 'public';
+$isPublic = $status === 'public';
+
 $stmt = $pdo->prepare(
     "SELECT q.*, (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) AS answers_count
      FROM questions q WHERE q.quiz_id = ? ORDER BY q.question_number, q.id"
@@ -85,12 +96,21 @@ $questions = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editing: <?= htmlspecialchars($quiz['title']) ?></title>
     <link rel="stylesheet" href="../styles.css">
+    <script>
+    try {
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+    </script>
 </head>
 <body>
 <div class="admin_main">
 
     <div class="admin_top">
-        <h1>Edit quiz</h1>
+        <h1>Edit quiz
+            <span class="status <?= $isPublic ? 'status_public' : 'status_dev' ?>">
+                <?= $isPublic ? 'Public' : 'In development' ?>
+            </span>
+        </h1>
         <a href="admin.php" class="btn">Back to quiz list</a>
     </div>
 
@@ -119,6 +139,13 @@ $questions = $stmt->fetchAll();
                 <option value="created"  <?= $quiz['type'] === 'created'  ? 'selected' : '' ?>>Created</option>
             </select>
         </div>
+        <div class="field">
+            <label for="status">Status <span class="field_hint">(players can open only public quizzes)</span></label>
+            <select id="status" name="status">
+                <option value="public"      <?= $isPublic ? 'selected' : '' ?>>Public</option>
+                <option value="development" <?= !$isPublic ? 'selected' : '' ?>>In development</option>
+            </select>
+        </div>
         <div class="form_actions">
             <button type="submit" class="btn btn_dark">Save quiz</button>
         </div>
@@ -135,7 +162,7 @@ $questions = $stmt->fetchAll();
         <div class="admin_card">
             <table class="admin_table">
                 <thead>
-                    <tr><th class="col_id">#</th><th>Question</th><th>Answers</th><th></th></tr>
+                    <tr><th class="col_id">#</th><th>Question</th><th>Answers</th><th>Timer</th><th></th></tr>
                 </thead>
                 <tbody>
                 <?php foreach ($questions as $n => $q): ?>
@@ -143,6 +170,7 @@ $questions = $stmt->fetchAll();
                         <td class="col_id"><?= $n + 1 ?></td>
                         <td class="col_title"><?= htmlspecialchars(mb_strimwidth($q['question_text'], 0, 80, '...')) ?></td>
                         <td><?= (int)$q['answers_count'] ?></td>
+                        <td><?= (int)$q['time_limit'] ?> s</td>
                         <td class="col_actions">
                             <div class="admin_actions">
                                 <a href="question_edit.php?quiz_id=<?= $id ?>&amp;id=<?= (int)$q['id'] ?>" class="btn">Edit</a>
@@ -161,5 +189,7 @@ $questions = $stmt->fetchAll();
     <?php endif; ?>
 
 </div>
+
+<script src="../toast.js"></script>
 </body>
 </html>

@@ -32,6 +32,11 @@ $quizzes = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liked quizzes - Quizzity</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        } catch (e) {}
+    </script>
 </head>
 <body>
 
