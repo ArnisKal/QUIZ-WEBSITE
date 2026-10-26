@@ -1,13 +1,11 @@
 <?php
-require_once __DIR__ . '/admin_check.php';   // admin check + $pdo + session
+require_once __DIR__ . '/admin_check.php';  
 
 if (empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-
-/* ---------- image helpers ---------- */
 function save_image(array $file): ?string
 {
     if ($file['error'] === UPLOAD_ERR_NO_FILE) return null;
@@ -33,7 +31,6 @@ function save_image(array $file): ?string
     return 'images/uploads/' . $name;
 }
 
-// Only removes files uploaded through this page, never your original images
 function delete_uploaded_image(?string $path): void
 {
     if ($path && strpos($path, 'images/uploads/') === 0) {
@@ -42,7 +39,6 @@ function delete_uploaded_image(?string $path): void
     }
 }
 
-/* ---------- handle POST ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if (!hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
@@ -126,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-/* ---------- load data ---------- */
 $message = $_SESSION['flash'] ?? '';
 unset($_SESSION['flash']);
 
@@ -150,7 +145,6 @@ $faqs   = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchA
         } catch (e) {}
     </script>
     <style>
-        /* Small additions for the edit forms. Move these into styles.css if you like. */
         .content_form { padding: 16px 20px; border-bottom: 1px solid rgba(128,128,128,.25); }
         .content_form:last-child { border-bottom: 0; }
         .content_form label { display: block; margin: 10px 0 4px; font-weight: 600; font-size: .9rem; }
@@ -186,7 +180,9 @@ $faqs   = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchA
     <div class="admin_top">
         <div>
             <h1>Homepage content</h1>
-            <p><a href="admin.php">&larr; Back to quizzes</a> &middot; <a href="../index.php">View homepage</a></p>
+            <p>
+            <a href="admin.php"> Back to admin page</a>
+            </p>
         </div>
     </div>
 
@@ -194,7 +190,6 @@ $faqs   = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchA
         <p class="flash_ok admin_flash" role="status"><?= h($message) ?></p>
     <?php endif; ?>
 
-    <!-- ================= FEATURE BLOCKS ================= -->
     <div class="admin_top"><h2>Feature blocks</h2></div>
 
     <div class="admin_card">
@@ -249,7 +244,6 @@ $faqs   = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchA
         </form>
     </div>
 
-    <!-- ================= FAQ ================= -->
     <div class="admin_top"><h2>FAQ</h2></div>
 
     <div class="admin_card">

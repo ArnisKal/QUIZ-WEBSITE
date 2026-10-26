@@ -1,6 +1,16 @@
 <?php session_start();?>
 <?php require_once 'auth.php'; ?>
 <?php require_once 'site_check.php'; ?>
+<?php
+if (!isset($pdo)) {
+    require_once 'database.php';   
+}
+
+$blocks = $pdo->query('SELECT * FROM info_blocks ORDER BY sort_order, id')->fetchAll();
+$faqs   = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchAll();
+
+function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,8 +57,6 @@
 
     </div>
 
-   
-
     <input type="search" class="search" placeholder="Search quizzes...">
 
     <nav class="nav">
@@ -58,8 +66,8 @@
         <?php if (isset($_SESSION['user_id'])): ?>
 
             <a href="account.php" class="avatar"
-                title="<?= htmlspecialchars($_SESSION['username']) ?>"
-                aria-label="Account: <?= htmlspecialchars($_SESSION['username']) ?>">
+                title="<?= h($_SESSION['username']) ?>"
+                aria-label="Account: <?= h($_SESSION['username']) ?>">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="8" r="4"/>
                         <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/>
@@ -79,8 +87,6 @@
 
         <?php endif; ?>
 
-        
-
     </nav>
 
 </header>
@@ -93,73 +99,40 @@
         </div>
     </div>
 
+    <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+        <p style="text-align:center; margin:10px;">
+            <a href="admin/content.php">&#9998; Edit homepage content</a>
+        </p>
+    <?php endif; ?>
+
     <section class="info-blocks">
 
-        <article class="info-block">
-            <img src="images/craft.jpg" alt="Create Quizzes">
-            <h2>Create Quizzes</h2>
-            <p>Build your own quizzes in minutes and share them with the world.</p>
-        </article>
-
-        <article class="info-block">
-            <img src="images/" alt="Play &amp; Learn">
-            <h2>Play &amp; Learn</h2>
-            <p>Try quizzes made by the community on any topic.</p>
-        </article>
-
-        <article class="info-block">
-            <img src="images/leader.jpeg" alt="Climb the Leaderboard">
-            <h2>Climb the Leaderboard</h2>
-            <p>Score points, beat other players and become number one.</p>
-        </article>
-
-        <article class="info-block">
-            <img src="images/" alt="Join the Community">
-            <h2>Join the QUIZZITY</h2>
-            <p>Join our team, to be yourself!</p>
-        </article>
+        <?php foreach ($blocks as $b): ?>
+            <article class="info-block">
+                <?php if (!empty($b['image'])): ?>
+                    <img src="<?= h($b['image']) ?>" alt="<?= h($b['title']) ?>">
+                <?php endif; ?>
+                <h2><?= h($b['title']) ?></h2>
+                <p><?= h($b['description']) ?></p>
+            </article>
+        <?php endforeach; ?>
 
     </section>
 
     <section class="faq">
     <h2 class="faq_title">FAQ</h2>
 
-    <details class="faq_item" open>
-        <summary>
-            <span>What is Quizzity?</span>
-            <span class="faq_line"></span>
-            <span class="faq_arrow"></span>
-        </summary>
-        <p class="faq_answer">
-            Quizzity is an online quiz platform where you can play quizzes
-            made by us and compete on the leaderboards.
-        </p>
-    </details>
-
-    <details class="faq_item">
-        <summary>
-            <span>How I can create my own quizz?</span>
-            <span class="faq_line"></span>
-            <span class="faq_arrow"></span>
-        </summary>
-        <p class="faq_answer">
-            For now you can't, only admin can create our quizzes!
-        </p>
-    </details>
-
-     <details class="faq_item">
-        <summary>
-            <span>Do I need to register my account to play Quizzity?</span>
-            <span class="faq_line"></span>
-            <span class="faq_arrow"></span>
-        </summary>
-        <p class="faq_answer">
-            Yes, you do. You don't have necessarily have to register using Google.
-        </p>
-    </details>       
+    <?php foreach ($faqs as $i => $f): ?>
+        <details class="faq_item"<?= $i === 0 ? ' open' : '' ?>>
+            <summary>
+                <span><?= h($f['question']) ?></span>
+                <span class="faq_line"></span>
+                <span class="faq_arrow"></span>
+            </summary>
+            <p class="faq_answer"><?= nl2br(h($f['answer'])) ?></p>
+        </details>
+    <?php endforeach; ?>
 </section>
-
-
 
    <footer class="footer">
     <nav class="footer_links">
@@ -170,7 +143,6 @@
     </nav>
     <p class="footer_copy">© 2026 QUIZZITY. All rights reserved.</p>
 </footer>
-
 
 </body>
 </html>
