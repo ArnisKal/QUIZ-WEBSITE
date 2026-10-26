@@ -1,7 +1,7 @@
 <?php
-
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require 'database.php';
+require_once 'theme.php';
 
 // Create CSRF token
 if (empty($_SESSION['csrf'])) {

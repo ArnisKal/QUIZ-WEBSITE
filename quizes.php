@@ -1,11 +1,12 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 if (($_SESSION['role'] ?? '') === 'admin') {
     header('Location: admin/admin.php');
     exit;
 }
 require_once 'site_check.php';
 require_once 'database.php';
+require_once 'theme.php';
 
 $quizzes = $pdo->query("
     SELECT q.*
@@ -22,18 +23,12 @@ if (isset($_SESSION['user_id'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($theme) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quizzes</title>
     <link rel="stylesheet" href="styles.css">
-    <script>
-    try {
-        var t = localStorage.getItem('theme');
-        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-    } catch (e) {}
-    </script>
 </head>
 <body>
 

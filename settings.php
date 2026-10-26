@@ -1,22 +1,19 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 if (empty($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+require_once 'theme.php';  
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($theme) ?>">
+<html lang="en"<?= $theme === 'dark' ? ' data-theme="dark"' : '' ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Quizzity</title>
     <link rel="stylesheet" href="styles.css">
-    <script>
-    try {
-        if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-    } catch (e) {}
-    </script>
 </head>
 <body>
     <main class="set_page">
@@ -39,11 +36,11 @@ if (empty($_SESSION['user_id'])) {
                     <div class="set_control">
                         <div class="set_options" role="radiogroup" aria-labelledby="modeLabel">
                             <label class="set_option">
-                                <input type="radio" name="mode" value="light" checked>
+                                <input type="radio" name="mode" value="light" <?= $theme === 'light' ? 'checked' : '' ?>>
                                 <span>Light</span>
                             </label>
                             <label class="set_option">
-                                <input type="radio" name="mode" value="dark">
+                                <input type="radio" name="mode" value="dark" <?= $theme === 'dark' ? 'checked' : '' ?>>
                                 <span>Dark</span>
                             </label>
                         </div>
@@ -76,36 +73,29 @@ if (empty($_SESSION['user_id'])) {
     </main>
 
 <script>
-    var modeInputs = document.querySelectorAll('input[name="mode"]');
+  var modeInputs = document.querySelectorAll('input[name="mode"]');
 
-    function applyTheme(theme) {
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-        }
-        try { localStorage.setItem('theme', theme); } catch (e) {}
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
     }
-    var saved = 'light';
-    try { saved = localStorage.getItem('theme') || 'light'; } catch (e) {}
-    modeInputs.forEach(function (input) {
-        input.checked = (input.value === saved);
-        input.addEventListener('change', function () {
-            if (input.checked) applyTheme(input.value);
-        });
-    });
-    var tabs   = document.querySelectorAll('.set_tab');
-    var panels = document.querySelectorAll('.set_panel');
+    fetch('save_theme.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'theme=' + encodeURIComponent(theme),
+    keepalive: true
+}).then(function (r) { return r.json(); })
+  .then(function (d) { if (!d.ok) console.error('Theme not saved'); })
+  .catch(function (e) { console.error(e); });
+}
 
-    tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            tabs.forEach(function (t) { t.classList.remove('active'); });
-            tab.classList.add('active');
-            panels.forEach(function (p) {
-                p.hidden = (p.id !== 'tab-' + tab.dataset.tab);
-            });
-        });
+modeInputs.forEach(function (input) {
+    input.addEventListener('change', function () {
+        if (input.checked) applyTheme(input.value);
     });
+});
 </script>
 </body>
 </html>
