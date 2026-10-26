@@ -101,7 +101,7 @@ foreach ($questions as $q) {
         <div class="play_score" id="scoreText"></div>
         <p id="scoreMsg"></p>
         <a href="quiz.php?id=<?= $id ?>" class="btn btn_play">Play again</a>
-        <a href="index.php" class="btn">Back to quizzes</a>
+        <a href="quizes.php" class="btn">Back to quizzes</a>
     </div>
 
 <?php endif; ?>
