@@ -116,10 +116,17 @@ $quizzes = $pdo->query('
                 </tbody>
             </table>
 
+
             <p class="admin_empty" id="noResults" hidden>No quizzes match your search.</p>
 
         <?php endif; ?>
     </div>
+
+    <br>
+
+     <div class="admin_actions">
+        <a href="content.php" class="btn">Homepage content</a>
+     </div>
 
 </main>
 
