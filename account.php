@@ -1,12 +1,13 @@
 <?php
-session_start();
-if (empty($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once 'site_check.php';
 require_once 'database.php';
 require_once 'countries.php';
+require_once 'theme.php';
+require_once 'auth.php';
+
+
+
 
 $userId = (int)$_SESSION['user_id'];
 
@@ -126,14 +127,14 @@ if ($isPost) {
                 header('Location: index.php');
                 exit;
             } catch (PDOException $e) {
-                $error = 'This account owns quizzes and cannot be deleted yet. Ask an admin for help.';
+                $error = 'This account can not be deleted yet';
             }
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= htmlspecialchars($theme) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
