@@ -166,6 +166,7 @@ function showQuestion() {
 
     startTimer(q.time);
 }
+
 function pick(btn, answer) {
     if (locked) return;
     chosen = { btn: btn, answer: answer };
@@ -173,6 +174,9 @@ function pick(btn, answer) {
         b.classList.remove('picked');
     });
     btn.classList.add('picked');
+
+    elNext.textContent = (current === QUESTIONS.length - 1) ? 'See result' : 'Next';
+    elNext.style.display = 'inline-block';
 }
 
 function startTimer(seconds) {
@@ -195,9 +199,15 @@ function startTimer(seconds) {
     tick();
     timerId = setInterval(tick, 200);
 }
+
 function reveal() {
     if (locked) return;
     locked = true;
+
+    clearInterval(timerId);
+    var w = getComputedStyle(elTimerBar).width;
+    elTimerBar.style.transition = 'none';
+    elTimerBar.style.width = w;
 
     var q = QUESTIONS[current];
     var buttons = elAnswers.querySelectorAll('.play_btn');
@@ -228,6 +238,10 @@ function reveal() {
 }
 
 elNext.addEventListener('click', function () {
+    if (!locked) {
+        reveal();
+        return;
+    }
     clearInterval(timerId);
     current++;
     if (current < QUESTIONS.length) {

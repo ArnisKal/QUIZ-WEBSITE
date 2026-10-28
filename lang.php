@@ -1,4 +1,5 @@
 <?php
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 $languages = [
@@ -6,63 +7,81 @@ $languages = [
     'lv' => 'Latviešu',
 ];
 
-if (isset($_GET['lang']) && isset($languages[$_GET['lang']])) {
-    $_SESSION['lang'] = $_GET['lang'];
-    header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
-    exit;
-}
+$defaultLang = 'en';
 
-$lang = $_SESSION['lang'] ?? 'en';
-if (!isset($languages[$lang])) $lang = 'en';
+$lang = $defaultLang;
+
+if (isset($_GET['lang']) && isset($languages[$_GET['lang']])) {
+    $lang = $_GET['lang'];
+    $_SESSION['lang'] = $lang;
+
+    if (!headers_sent()) {
+        setcookie('lang', $lang, [
+            'expires'  => time() + 60 * 60 * 24 * 365,
+            'path'     => '/',
+            'samesite' => 'Lax',
+        ]);
+    }
+} elseif (isset($_SESSION['lang']) && isset($languages[$_SESSION['lang']])) {
+    $lang = $_SESSION['lang'];
+} elseif (isset($_COOKIE['lang']) && isset($languages[$_COOKIE['lang']])) {
+    $lang = $_COOKIE['lang'];
+    $_SESSION['lang'] = $lang;
+}
 
 $translations = [
     'en' => [
+        'menu'         => 'Menu',
         'settings'     => 'Settings',
         'account'      => 'Account',
-        'liked'        => 'Liked quizzes',
+        'liked'        => 'Liked',
         'leaderboard'  => 'Leaderboard',
         'leaderboards' => 'Leaderboards',
-        'quizzes'      => 'Quizzes',
         'search'       => 'Search quizzes...',
-        'admin'        => 'Admin',
-        'logout'       => 'Logout',
-        'login'        => 'Login',
-        'register'     => 'Register',
-        'menu'         => 'Menu',
         'language'     => 'Language',
-        'theme'        => 'Toggle theme',
+        'quizzes'      => 'Quizzes',
+        'admin'        => 'Admin',
+        'login'        => 'Login',
+        'register'     => 'Sign up',
+        'logout'       => 'Logout',
         'faq'          => 'FAQ',
         'rights'       => 'All rights reserved.',
     ],
     'lv' => [
+        'menu'         => 'Izvēlne',
         'settings'     => 'Iestatījumi',
         'account'      => 'Konts',
-        'liked'        => 'Iecienītās viktorīnas',
+        'liked'        => 'Patīk',
         'leaderboard'  => 'Līderu saraksts',
         'leaderboards' => 'Līderu saraksti',
-        'quizzes'      => 'Viktorīnas',
         'search'       => 'Meklēt viktorīnas...',
-        'admin'        => 'Admins',
-        'logout'       => 'Iziet',
-        'login'        => 'Ielogoties',
-        'register'     => 'Reģistrēties',
-        'menu'         => 'Izvēlne',
         'language'     => 'Valoda',
-        'theme'        => 'Mainīt motīvu',
-        'faq'          => 'BUJ',
+        'quizzes'      => 'Viktorīnas',
+        'admin'        => 'Administrators',
+        'login'        => 'Pieslēgties',
+        'register'     => 'Reģistrēties',
+        'logout'       => 'Iziet',
+        'faq'          => 'Biežāk uzdotie jautājumi',
         'rights'       => 'Visas tiesības aizsargātas.',
     ],
 ];
 
-function t(string $key): string {
-    global $lang, $translations;
-    return $translations[$lang][$key] ?? $translations['en'][$key] ?? $key;
+function t(string $key): string
+{
+    global $translations, $lang;
+    $text = $translations[$lang][$key]
+         ?? $translations['en'][$key]
+         ?? $key;
+    return htmlspecialchars($text);
 }
-function tr(array $row, string $field): string {
+
+function tr(array $row, string $field): string
+{
     global $lang;
-    if ($lang !== 'en') {
-        $value = $row[$field . '_' . $lang] ?? '';
-        if ($value !== '') return $value;
+    foreach ([$field . '_' . $lang, $field . '_en', $field] as $col) {
+        if (!empty($row[$col])) {
+            return (string)$row[$col];
+        }
     }
-    return $row[$field] ?? '';
+    return '';
 }
