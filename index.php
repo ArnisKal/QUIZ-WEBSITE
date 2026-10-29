@@ -37,7 +37,7 @@ $faq    = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchA
                 <a href="settings.php"><?= t('settings') ?></a>
                 <a href="account.php"><?= t('account') ?></a>
                 <a href="liked.php"><?= t('liked') ?></a>
-                <a href="leaderboards.php"><?= t('leaderboard') ?></a>
+                <a href="#"><?= t('leaderboard') ?></a>
             </div>
         </div>
 
@@ -53,7 +53,16 @@ $faq    = $pdo->query('SELECT * FROM faq_items ORDER BY sort_order, id')->fetchA
         <h1>QUIZZITY</h1>
     </div>
 
-    <input type="search" class="search" placeholder="<?= t('search') ?>">
+    <form action="quizes.php" method="get" class="search_form" role="search">
+        <input
+            type="search"
+            name="q"
+            class="search"
+            value="<?= htmlspecialchars($_GET['q'] ?? '') ?>"
+            placeholder="<?= t('search') ?>"
+            aria-label="<?= t('search') ?>"
+        >
+    </form>
 
     <nav class="nav">
         <div class="lang_switch" role="group" aria-label="<?= t('language') ?>">
